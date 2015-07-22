@@ -154,7 +154,10 @@
 <script type="text/javascript" src="/realtimewebui/externals/underscore-min.js"></script>
 <script type="text/javascript" src="/realtimewebui/externals/knockout-3.1.0.js"></script>
 <script type="text/javascript" src="/realtimewebui/js/realtimewebui.js"></script>
+<script type="text/javascript" src="/static/utils.js"></script>
 <script>
+var defaultMaxNrServersPerRack = 64;
+var wereRacksUpdated = false;
 var allocationColors = ["#ab47bc", "#5c6bc0", "#8d6e63", "#f44336", "#f44336", "#e91e63", "#e91e63", "#9c27b0", "#9c27b0", "#3f51b5", "#3f51b5", "#2196f3", "#2196f3", "#00bcd4", "#00bcd4", "#009688", "#009688", "#4caf50", "#4caf50", "#cddc39", "#ff9800", "#ff9800", "#795548", "#795548", "#e53935", "#d81b60", "#8e24aa", "#3949ab", "#1e88e5", "#00acc1", "#00897b", "#43a047", "#fb8c00", "#6d4c41", "#d32f2f", "#c2185b", "#7b1fa2", "#303f9f", "#1976d2", "#0097a7", "#00796b", "#388e3c", "#afb42b", "#f57c00", "#5d4037", "#c62828", "#ad1457", "#6a1b9a", "#283593", "#1565c0", "#00838f", "#00695c", "#2e7d32", "#9e9d24", "#ef6c00", "#4e342e", "#b71c1c", "#880e4f", "#4a148c", "#1a237e", "#0d47a1", "#006064", "#004d40", "#1b5e20", "#827717", "#e65100", "#3e2723"];
 
 function setStatus(statusObject)
@@ -162,6 +165,10 @@ function setStatus(statusObject)
     if (!statusObject)
         return;
 
+    if (!wereRacksUpdated) {
+        updateRacks(statusObject);
+        wereRacksUpdated = true;
+    }
     updateHosts(statusObject);
     model.allocations.update(statusObject);
 }
@@ -177,7 +184,6 @@ var stateMap = {
     "OFFLINE":{ iconClass: "glyphicon-ban-circle", labelClass: "label-default-dark" }
 
 };
-
 
 function updateHosts(statusObject)
 {
@@ -220,8 +226,41 @@ function updateHosts(statusObject)
             trigger: "hover",
             placement: "auto"
         })
-
     }
+}
+
+function updateRacks(statusObject) {
+    var nrHostsPerRow = 2;
+    racksNumbers = _.reduce(statusObject.hosts, function(racksNumbers, host) {
+        var rackNumber = parseInt(host.id.replace("rack", "").replace("-server\d", ""));
+        racksNumbers.push(rackNumber);
+        return racksNumbers;
+    },
+    []);
+    racksNumbers = _.uniq(racksNumbers);
+    racksNumbers = _.sortBy(racksNumbers, function(number) {
+        return number;
+    });
+    maxServerNumber = _.groupBy(statusObject.hosts, function(host) {
+        return parseInt(host.id.replace(/rack\d+-server/, ""));
+    });
+    racksTables = [];
+    // Pupulate the arrays which represent the racks' table rows
+    _.each(racksNumbers, function(rackNumber) {
+        rack = {number: rackNumber, hostsRows: []};
+        racksTables.push(rack);
+        var row = [];
+        for (var hostNumber = 1; hostNumber <= defaultMaxNrServersPerRack; ++hostNumber) {
+            hostElementId = "node-rack" + padWithLeadingZeros(rack.number) + "-server" +
+                padWithLeadingZeros(hostNumber);
+            row.push(hostElementId);
+            if (hostNumber % nrHostsPerRow == 0 || hostNumber == defaultMaxNrServersPerRack) {
+                rack.hostsRows.push(row);
+                row = [];
+            }
+        }
+    });
+    model.racks(racksTables);
 }
 
 function Allocation(allocationStatus, color) {
@@ -367,6 +406,7 @@ function Model() {
     var self = this;
     self.allocations = new AllocationsModel();
     self.hostListViewMode = ko.observable("state");
+    self.racks = ko.observableArray([]);
 
     self.hostListViewMode.subscribe(function(state) {
         updateHosts(self.allocations.currentStatus());
