@@ -81,8 +81,8 @@ tr.hover .hosts-list {
 .label-default-dark {
     background-color: black;
 }
-.label-dark-red {
-    background-color: darkred;
+.label-detached {
+    background-color: #2f4f4f;
 }
 .copy-command {
     width: 15px;
