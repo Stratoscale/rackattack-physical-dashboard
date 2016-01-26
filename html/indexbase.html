@@ -277,11 +277,12 @@ function updateHosts(statusObject)
         data.color = data.color || "#777";
 
         var nodeName = _.invert(allocation.allocated)[hostObject.index];
-        var content = hostObject.ipAddress;
+        var content = "Inner: " + hostObject.ipAddress;
         content += "<br />Outer: " + NAT_ADDR + ":" + getNatPortFromInnerIPAddress(hostObject.ipAddress);
         if (nodeName) {
             content += "<br />Node: " + nodeName;
         }
+        content += "<br />Pool: " + pool;
         node.html(template(data));
         node.popover({
             title: hostObject.id,
