@@ -116,3 +116,6 @@ label {
 .allocation-row .host-icon .glyphicon {
     font-size: 10px;
 }
+.top-row {
+    margin-top: 13px;
+}

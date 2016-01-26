@@ -12,13 +12,23 @@ parser.add_argument("--webSocketPort", type=int, default=6002)
 parser.add_argument("--realtimewebuiRoot")
 parser.add_argument("--dashboardRoot")
 parser.add_argument("--localhostRackattackProvider", action='store_true')
+parser.add_argument("--rackattackInstances", type=str)
 args = parser.parse_args()
 
 if args.realtimewebuiRoot is not None:
     realtimewebui.config.REALTIMEWEBUI_ROOT_DIRECTORY = args.realtimewebuiRoot
+
 if args.localhostRackattackProvider:
-    os.environ['RACKATTACK_PROVIDER'] = \
-        'tcp://localhost:1014@@amqp://guest:guest@localhost:1013/%2F@@http://localhost:1016'
+    dashboardSources = [dict(name="Local", host="localhost")]
+elif args.rackattackInstances:
+    dashboardSources = [dict(zip(("name", "host"), provider.split(":")))
+                        for provider in args.rackattackInstances.split(',')]
+else:
+    raise Exception("Please define one or more rackattack instances")
+
+
+logging.info("Rackattack instances: %(dashboardSources)s", dict(dashboardSources=dashboardSources))
+
 
 from realtimewebui import server
 from realtimewebui import rootresource
@@ -27,17 +37,25 @@ from rackattack.dashboard import pollthread
 from twisted.web import static
 
 
-poller = pollthread.PollThread()
+pollThreads = list()
+for dashboardSource in dashboardSources:
+    logging.info("Creating poll thread for %(dashboardSource)s",
+                 dict(dashboardSource=dashboardSource["name"]))
+    pollThreads.append(pollthread.PollThread(dashboardSource["name"], dashboardSource["host"]))
 
 render.addTemplateDir(os.path.join(args.dashboardRoot, 'html'))
 render.DEFAULTS['title'] = "Rackattack"
 render.DEFAULTS['brand'] = "Rackattack"
 render.DEFAULTS['mainMenu'] = []
 render.DEFAULTS["useStyleTheme"] = True
+render.DEFAULTS['dashboardSources'] = dashboardSources
 root = rootresource.rootResource()
 root.putChild("js", static.File(os.path.join(args.dashboardRoot, "js")))
 root.putChild("static", static.File(os.path.join(args.dashboardRoot, "static")))
 root.putChild("favicon.ico", static.File(os.path.join(args.dashboardRoot, "static", "favicon.ico")))
 root.putChild("wallboard", rootresource.Renderer("index-wallboard.html", {}))
 root.putChild("seriallogs", static.File("/var/lib/rackattackphysical/seriallogs"))
+for dashboardSource in dashboardSources:
+    root.putChild(dashboardSource["name"],
+                  rootresource.Renderer("index.html", dict(defaultDashboard=dashboardSource["name"])))
 server.runUnsecured(root, args.webPort, args.webSocketPort)
