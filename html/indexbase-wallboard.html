@@ -8,33 +8,33 @@
 <link href="/static/wallboard-style.css" rel="stylesheet">
 
 <div class="wallboard-container">
-    {% block rack %}{% endblock %}
+{% block rack %}{% endblock %}
 </div>
 
 <script type="text/html" id="machine-template-state">
-    <a class="machine-link" href="seriallogs/<%= serverID %>-serial.txt" target="_new">
-        <span class="label <%= config.labelClass %> machine-label">
-            <span class="glyphicon <%= config.iconClass %>"></span>
-            <%= serverNumber  %>
-        </span>
-    </a>
+<a class="machine-link" href="seriallogs/<%= serverID %>-serial.txt" target="_new">
+    <span class="label <%= config.labelClass %> machine-label">
+        <span class="glyphicon <%= config.iconClass %>"></span>
+        <%= serverNumber  %>
+    </span>
+</a>
 </script>
 <script type="text/html" id="machine-template-allocation">
-    <a class="machine-link" href="seriallogs/<%= serverID %>-serial.txt" target="_new">
-        <span class="label <%= config.labelClass %> machine-label" style="background-color: <%= color %>">
-            <span class="glyphicon <%= config.iconClass %>"></span>
-            <%= serverNumber  %>
-        </span>
-    </a>
+<a class="machine-link" href="seriallogs/<%= serverID %>-serial.txt" target="_new">
+    <span class="label <%= config.labelClass %> machine-label" style="background-color: <%= color %>">
+        <span class="glyphicon <%= config.iconClass %>"></span>
+        <%= serverNumber  %>
+    </span>
+</a>
 </script>
 </script>
 <script type="text/html" id="machine-template-pool">
-    <a class="machine-link" href="seriallogs/<%= serverID %>-serial.txt" target="_new">
-        <span class="label <%= config.labelClass %> machine-label" style="background-color: <%= color %>">
-            <span class="glyphicon <%= config.iconClass %>"></span>
-            <%= serverNumber  %>
-        </span>
-    </a>
+<a class="machine-link" href="seriallogs/<%= serverID %>-serial.txt" target="_new">
+    <span class="label <%= config.labelClass %> machine-label" style="background-color: <%= color %>">
+        <span class="glyphicon <%= config.iconClass %>"></span>
+        <%= serverNumber  %>
+    </span>
+</a>
 </script>
 </script>
 
@@ -44,7 +44,14 @@
 <script type="text/javascript" src="/realtimewebui/js/realtimewebui.js"></script>
 <script type="text/javascript" src="/static/utils.js"></script>
 <script type="text/javascript" src="/static/cookies.js"></script>
+
 <script>
+var rackattackInstances = [
+{% for dashboardSource in dashboardSources %}
+{name: "{{ dashboardSource.name }}", host: "{{ dashboardSource.host }}"},
+{% endfor %}
+]
+var NAT_ADDR = "rackattack-nat.dc1";
 var wereRacksUpdated = false;
 var lotsOfColors = ["#ab47bc", "#5c6bc0", "#8d6e63", "#f44336", "#e91e63", "#9c27b0", "#3f51b5", "#2196f3", "#00bcd4", "#009688", "#4caf50", "#cddc39", "#ff9800", "#795548", "#e53935", "#d81b60", "#8e24aa", "#3949ab", "#1e88e5", "#00acc1", "#00897b", "#43a047", "#fb8c00", "#6d4c41", "#d32f2f", "#c2185b", "#7b1fa2", "#303f9f", "#1976d2", "#0097a7", "#00796b", "#388e3c", "#afb42b", "#f57c00", "#5d4037", "#c62828", "#ad1457", "#6a1b9a", "#283593", "#1565c0", "#00838f", "#00695c", "#2e7d32", "#9e9d24", "#ef6c00", "#4e342e", "#b71c1c", "#880e4f", "#4a148c", "#1a237e", "#0d47a1", "#006064", "#004d40", "#1b5e20", "#827717", "#e65100", "#3e2723", 'AliceBlue', 'AntiqueWhite', 'Aqua', 'Aquamarine', 'Azure', 'Beige', 'Bisque', 'Black', 'BlanchedAlmond', 'Blue', 'BlueViolet', 'Brown', 'BurlyWood', 'CadetBlue', 'Chartreuse', 'Chocolate', 'Coral', 'CornflowerBlue', 'Cornsilk', 'Crimson', 'Cyan', 'DarkBlue', 'DarkCyan', 'DarkGoldenRod', 'DarkGray', 'DarkGreen', 'DarkKhaki', 'DarkMagenta', 'DarkOliveGreen', 'DarkOrange', 'DarkOrchid', 'DarkRed', 'DarkSalmon', 'DarkSeaGreen', 'DarkSlateBlue', 'DarkSlateGray', 'DarkTurquoise', 'DarkViolet', 'DeepPink', 'DeepSkyBlue', 'DimGray', 'DodgerBlue', 'FireBrick', 'FloralWhite', 'ForestGreen', 'Fuchsia', 'Gainsboro', 'GhostWhite', 'Gold', 'GoldenRod', 'Gray', 'Green', 'GreenYellow', 'HoneyDew', 'HotPink', 'IndianRed', 'Indigo', 'Ivory', 'Khaki', 'Lavender', 'LavenderBlush', 'LawnGreen', 'LemonChiffon', 'LightBlue', 'LightCoral', 'LightCyan', 'LightGoldenRodYellow', 'LightGray', 'LightGreen', 'LightPink', 'LightSalmon', 'LightSeaGreen', 'LightSkyBlue', 'LightSlateGray', 'LightSteelBlue', 'LightYellow', 'Lime', 'LimeGreen', 'Linen', 'Magenta', 'Maroon', 'MediumAquaMarine', 'MediumBlue', 'MediumOrchid', 'MediumPurple', 'MediumSeaGreen', 'MediumSlateBlue', 'MediumSpringGreen', 'MediumTurquoise', 'MediumVioletRed', 'MidnightBlue', 'MintCream', 'MistyRose', 'Moccasin', 'NavajoWhite', 'Navy', 'OldLace', 'Olive', 'OliveDrab', 'Orange', 'OrangeRed', 'Orchid', 'PaleGoldenRod', 'PaleGreen', 'PaleTurquoise', 'PaleVioletRed', 'PapayaWhip', 'PeachPuff', 'Peru', 'Pink', 'Plum', 'PowderBlue', 'Purple', 'RebeccaPurple', 'Red', 'RosyBrown', 'RoyalBlue', 'SaddleBrown', 'Salmon', 'SandyBrown', 'SeaGreen', 'SeaShell', 'Sienna', 'Silver', 'SkyBlue', 'SlateBlue', 'SlateGray', 'Snow', 'SpringGreen', 'SteelBlue', 'Tan', 'Teal', 'Thistle', 'Tomato', 'Turquoise', 'Violet', 'Wheat', 'White', 'WhiteSmoke', 'Yellow', 'YellowGreen']
 var allocationColors = lotsOfColors.slice()
@@ -52,6 +59,10 @@ var poolColors = lotsOfColors.slice()
 
 function setStatus(statusObject)
 {
+    if (!model.activeDashboardName()) {
+        return;
+    }
+
     if (!statusObject)
         return;
 
@@ -81,10 +92,12 @@ function updateHosts(statusObject)
 {
     var viewMode = model.hostListViewMode();
     var template = _.template( $("#machine-template-" + viewMode).html() );
+    activeDashboardHost = model.activeDashboardHost() + ":6001";
     $(".machine").popover('destroy').each(function() {
         var serverNumber = $(this).attr("id").replace(/node-rack\d+-server/, "");
         $(this).html(template({
             serverNumber: serverNumber,
+            activeDashboardHost: activeDashboardHost,
             serverID: $(this).attr("id"),
             config: {
                 iconClass: "glyphicon-ban-circle",
@@ -109,6 +122,7 @@ function updateHosts(statusObject)
         var data = {
             serverID: hostObject.id,
             serverNumber: serverNumber,
+            activeDashboardHost: activeDashboardHost,
             config: stateMap[hostObject.state]
         };
         if (viewMode == "allocation") {
@@ -120,8 +134,9 @@ function updateHosts(statusObject)
 
         var nodeName = _.invert(allocation.allocated)[hostObject.index];
         var content = hostObject.ipAddress;
+        content += "<br />Outer: " + NAT_ADDR + ":" + getNatPortFromInnerIPAddress(hostObject.ipAddress);
         if (nodeName) {
-            content += " (" + nodeName + ")"
+            content += "<br />Node: " + nodeName;
         }
         node.html(template(data));
         node.popover({
@@ -129,7 +144,8 @@ function updateHosts(statusObject)
             container: "body",
             content: content,
             trigger: "hover",
-            placement: "auto"
+            placement: "auto",
+            html: true
         })
     }
 }
@@ -167,6 +183,29 @@ function updateRacks(statusObject) {
     model.racks(racksTables);
 }
 
+function getNatPortFromInnerIPAddress(ipAddress) {
+        return 2000 + parseInt(ipAddress.split(".")[3]) + (parseInt(ipAddress.split(".")[2]) - 1) * 256;
+}
+
+function postRender(element, index, dataItem) {
+    if (element.nodeName == "LI") {
+        var target = element.querySelector(".copy-command");
+        var client = new ZeroClipboard(target);
+        client.on("ready", function (readyEvent) {
+            client.on("copy", function (e) {
+                e.clipboardData.setData("text/plain", dataItem.copyCommand);
+            });
+            client.on("aftercopy", function () {
+                var iconElement = $(target).find(".glyphicon");
+                iconElement.removeClass("glyphicon-circle-arrow-right").addClass("glyphicon-thumbs-up");
+                setTimeout(function () {
+                    iconElement.removeClass("glyphicon-thumbs-up").addClass("glyphicon-circle-arrow-right");
+                }, 1000);
+            })
+        });
+    }
+}
+
 function Allocation(allocationStatus, color) {
     var self = this;
     self.index = allocationStatus.index;
@@ -175,15 +214,49 @@ function Allocation(allocationStatus, color) {
     self.done = ko.observable(allocationStatus.done);
     self.dead = ko.observable(allocationStatus.dead);
     self.color = color;
+    self.duration = ko.observable("N/A");
+    if ("duration" in allocationStatus) {
+        self.duration(allocationStatus.duration);
+    }
 
     self._getCopyCommand = function (ipAddress) {
-        var port = 2000 + parseInt(ipAddress.split(".")[3]) + (parseInt(ipAddress.split(".")[2]) - 1) * 256;
-        return "sshpass -p rackattack ssh -o ServerAliveInterval=5 -o ServerAliveCountMax=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@rackattack-nat.dc1 -p " + port;
+        var port = getNatPortFromInnerIPAddress(ipAddress);
+        return "sshpass -p rackattack ssh -o ServerAliveInterval=5 -o ServerAliveCountMax=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@" + NAT_ADDR + " -p " + port;
+    };
+
+    self.getPrettyDuration = function(duration) {
+        nrSeconds = parseInt(duration);
+        nrMinutes = Math.floor(nrSeconds / 60);
+        if (nrMinutes == 0) {
+            nrMinutes = 1;
+        }
+        if (nrMinutes < 60) {
+            return nrMinutes + "m";
+        }
+        nrHours = Math.floor(nrMinutes / 60);
+        if (nrHours < 24) {
+            result = nrHours + "h";
+            nrMinutesResidue = nrMinutes % 60;
+            if (nrMinutesResidue > 0) {
+                result += " " + nrMinutesResidue + "m";
+            }
+            return result;
+        }
+        nrHoursResidue = nrHours % 24;
+        nrDays = Math.floor(nrHours / 24);
+        result = nrDays + "d";
+        if (nrHoursResidue > 0) {
+            result += " " + nrHoursResidue + "h";
+        }
+        return result;
     };
 
     self.update = function(allocationStatus) {
         self.done(allocationStatus.done);
         self.dead(allocationStatus.dead);
+        if ("duration" in allocationStatus) {
+            self.duration(self.getPrettyDuration(allocationStatus.duration));
+        }
     };
 
     self.applyClasses = function () {
@@ -202,22 +275,7 @@ function Allocation(allocationStatus, color) {
     };
 
     self.postRender = function (element, index, dataItem) {
-        if (element.nodeName == "LI") {
-            var target = element.querySelector(".copy-command");
-            var client = new ZeroClipboard(target);
-            client.on("ready", function (readyEvent) {
-                client.on("copy", function (e) {
-                    e.clipboardData.setData("text/plain", dataItem.copyCommand);
-                });
-                client.on("aftercopy", function () {
-                    var iconElement = $(target).find(".glyphicon");
-                    iconElement.removeClass("glyphicon-circle-arrow-right").addClass("glyphicon-thumbs-up");
-                    setTimeout(function () {
-                        iconElement.removeClass("glyphicon-thumbs-up").addClass("glyphicon-circle-arrow-right");
-                    }, 1000);
-                })
-            });
-        }
+        postRender(element, index, dataItem);
     };
 
     self.listHosts = ko.computed(function () {
@@ -241,13 +299,8 @@ function Allocation(allocationStatus, color) {
             return;
 
         $(event.target).parents("tr.allocation-row").addClass("hover");
-
-        for (var k in self.allocated) {
-            var index = self.allocated[k];
-            var id = hostsByIndex[index];
-            var elem = $("#node-" + id);
-            elem.addClass("node-when-allocation-is-hovered");
-        }
+        hostsIndices = _.values(self.allocated);
+        makeHostsBlink(hostsIndices);
     };
 
     self.mouseOut = function(allocation, event) {
@@ -258,12 +311,8 @@ function Allocation(allocationStatus, color) {
             return;
         }
         $(event.currentTarget).removeClass("hover");
-        for (var k in self.allocated) {
-            var index = self.allocated[k];
-            var id = hostsByIndex[index];
-            var elem = $("#node-" + id);
-            elem.removeClass("node-when-allocation-is-hovered");
-        }
+        hostsIndices = _.values(self.allocated);
+        makeHostsStopBlinking(hostsIndices);
     }
 }
 
@@ -271,6 +320,13 @@ function AllocationsModel() {
     var self = this;
     self.allocations = ko.observableArray([]);
     self.currentStatus = ko.observable({});
+
+    self.reset = function() {
+        _.each(self.allocations(), function(allocation) {
+            allocation.allocated = Object();
+        });
+        self.allocations.removeAll();
+    }
 
     self._freeColor = function()
     {
@@ -306,9 +362,61 @@ function AllocationsModel() {
     };
 }
 
+function makeHostsBlink(hostsIndices) {
+    hostsIndices.forEach(function(idx) {
+        var id = hostsByIndex[idx];
+        var elem = $("#node-" + id);
+        elem.addClass("node-when-allocation-is-hovered");
+    });
+}
+
+function makeHostsStopBlinking(hostsIndices) {
+    hostsIndices.forEach(function(idx) {
+        var id = hostsByIndex[idx];
+        var elem = $("#node-" + id);
+        elem.removeClass("node-when-allocation-is-hovered");
+    });
+}
+
+function Pool(poolName, hosts, color)
+{
+    var self = this;
+    self.name = poolName;
+    self.hosts = hosts;
+    self.color = color;
+
+    self.mouseOver = function(pool, event) {
+        $(event.target).parents("tr.allocation-row").addClass("hover");
+        hostsIndices = _.pluck(self.hosts, "index");
+        makeHostsBlink(hostsIndices)
+    };
+
+    self.mouseOut = function(pool, event) {
+        $(event.currentTarget).removeClass("hover");
+        hostsIndices = _.pluck(self.hosts, "index");
+        makeHostsStopBlinking(hostsIndices)
+    };
+
+    self.postRender = function (element, index, dataItem) {
+        postRender(element, index, dataItem);
+    };
+}
+
 function PoolsModel() {
     var self = this;
     self.pools = ko.observableArray();
+
+    self.reset = function() {
+        self.pools.removeAll();
+    }
+
+    self.addLabelClass = function(hosts, statusObject) {
+        for (idx in hosts) {
+            host = hosts[idx];
+            host["iconClass"] = stateMap[host.state]["iconClass"];
+            host["labelClass"] = stateMap[host.state]["labelClass"];
+        }
+    }
 
     self.update = function(statusObject)
     {
@@ -317,29 +425,27 @@ function PoolsModel() {
                 host["pool"] = "default";
             }
         });
-        pools = _.pluck(statusObject.hosts, "pool");
-        pools = _.uniq(pools);
-        pools.sort();
-        colorsPairs = _.object(pools, poolColors);
-        colorsPairsObjects = [];
-        hostsByPools = _.groupBy(statusObject.hosts, function(host) { return host.pool; });
-        for (pool in colorsPairs) {
-            poolData = {pool: pool, color: colorsPairs[pool]};
-            poolData["nrHosts"] = hostsByPools[pool].length;
-            colorsPairsObjects.push(poolData)
+        poolsNames = _.pluck(statusObject.hosts, "pool");
+        poolsNames = _.uniq(poolsNames);
+        poolsNames.sort();
+        colorsPairs = _.object(poolsNames, poolColors);
+        pools = [];
+        for (poolName in colorsPairs) {
+            hostsByPools = _.groupBy(statusObject.hosts, function(host) { return host.pool; });
+            hostsInPool = hostsByPools[poolName];
+            self.addLabelClass(hostsInPool);
+            pool = new Pool(poolName, hostsInPool, colorsPairs[poolName]);
+            pools.push(pool)
         }
-        self.pools(colorsPairsObjects);
+        self.pools(pools);
     };
 
-    self.getColorOfPool = function(pool) {
-        poolsColors = self.pools();
-        for (idx in poolsColors) {
-            poolColor = poolsColors[idx];
-            if (poolColor.pool == pool) {
-                return poolColor.color;
-            }
+    self.getColorOfPool = function(poolName) {
+        pool = _.find(model.pools.pools(), function(pool) { return pool.name == poolName } );
+        if (pool === undefined) {
+            return "#b9b9b9";
         }
-        return undefined;
+        return pool.color;
     }
 }
 
@@ -348,7 +454,9 @@ function Model() {
     self.allocations = new AllocationsModel();
     self.hostListViewMode = ko.observable("state");
     self.racks = ko.observableArray([]);
-    theme = "dark"
+    self.activeDashboardName = ko.observable();
+    self.activeDashboardHost = ko.observable();
+    theme = "dark";
     self.theme = ko.observable(theme);
     self.pools = new PoolsModel();
 
@@ -377,14 +485,44 @@ function Model() {
         console.log("No such allocation");
         return undefined;
     };
+    
+    self.classOfDashboardButton = function(dashboardName) {
+        if (dashboardName == self.activeDashboardName()) {
+            return "btn btn-primary";
+        }
+        return "btn btn-default";
+    };
+
+    self.loadDashboard = function(dashboardName) {
+        if (self.activeDashboardName() != "") {
+            ui.unregister("status_" + self.activeDashboardName(), setStatus);
+        }
+        self.activeDashboardName("");
+        model.allocations.reset();                                                                           
+        wereRacksUpdated = false;                                                                            
+        self.pools.reset(); 
+        _.each(rackattackInstances, function(instance) {
+            if (instance["name"] == dashboardName) {
+                self.activeDashboardHost(instance["host"]);
+                return;
+            }
+        });
+        ui.register("status_" + dashboardName, setStatus);
+        self.activeDashboardName(dashboardName);
+    }
 }
 
+
+var ui = new RealTimeWebUI();
 
 var model = new Model();
 ko.applyBindings(model);
 
-var ui = new RealTimeWebUI();
-ui.register("status", setStatus);
+var defaultDashboard = "{{ defaultDashboard }}";
+if (!defaultDashboard) {
+    defaultDashboard = rackattackInstances[0]["name"];
+}
+model.loadDashboard(defaultDashboard);
 
 </script>
 
