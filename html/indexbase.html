@@ -506,8 +506,11 @@ function AllocationsModel() {
         for (var i in statusObject.allocations) {
             var allocation = statusObject.allocations[i];
             if (!(allocation.index in allocations)) {
-                if (!allocation.dead)
-                    self.allocations.push(new Allocation(allocation, self._freeColor()));
+                if (!allocation.dead) {
+                    var newAllocation = new Allocation(allocation, self._freeColor())
+                    self.allocations.push(newAllocation);
+                    allocations[allocation.index] = newAllocation;
+                }
             }
             var allocationModel = allocations[allocation.index];
             if (allocationModel !== undefined) {
