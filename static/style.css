@@ -70,7 +70,8 @@ tr.hover .hosts-list {
     vertical-align: middle;
 }
 .table > tbody > tr.allocation-row > td{
-    padding: 4px;
+    padding: 2px 4px;
+    vertical-align: middle;
 }
 .allocation-row .label {
     display: block;
