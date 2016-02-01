@@ -501,27 +501,33 @@ function AllocationsModel() {
     self.update = function(statusObject)
     {
         self.currentStatus(statusObject);
-        var allocationIndices = {};
+        var allocations = _.object(_.map(self.allocations(), function(allocation) { return allocation.index; }),
+            model.allocations.allocations());
         for (var i in statusObject.allocations) {
             var allocation = statusObject.allocations[i];
-            allocationIndices[allocation.index] = true;
-            if (!_.contains(_.pluck(self.allocations(), 'index'), allocation.index)) {
+            if (!(allocation.index in allocations)) {
                 if (!allocation.dead)
                     self.allocations.push(new Allocation(allocation, self._freeColor()));
             }
-            var model = _.find(self.allocations(), function(a) { return a.index == allocation.index });
-            if (allocation.dead)
-                self.allocations.remove(model);
-            else {
-                model.update(allocation);
-                model.applyClasses();
+            var allocationModel = allocations[allocation.index];
+            if (allocationModel !== undefined) {
+                if (allocation.dead) {
+                    delete allocations[allocation.index];
+                    self.allocations.remove(allocationModel);
+                    allocationModel.listHosts.dispose()
+                } else {
+                    allocationModel.update(allocation);
+                    allocationModel.applyClasses();
+                }
             }
         }
-        var copy = new Array(self.allocations());
-        for (var i in copy) {
-            var model = copy[i];
-            if (!_.contains(_.pluck(statusObject.allocations, 'index'), model.index))
-                self.allocations.remove(model);
+        var statusIndices = _.pluck(statusObject.allocations, 'index');
+        for (var i in allocations) {
+            var allocationModel = allocations[i];
+            if (!_.contains(statusIndices, allocationModel.index)) {
+                self.allocations.remove(allocationModel);
+                allocationModel.listHosts.dispose()
+            }
         }
     };
 }
