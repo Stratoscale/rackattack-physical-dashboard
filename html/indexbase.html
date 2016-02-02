@@ -500,6 +500,7 @@ function AllocationsModel() {
 
     self.update = function(statusObject)
     {
+        ZeroClipboard.destroy();
         self.currentStatus(statusObject);
         var allocations = _.object(_.map(self.allocations(), function(allocation) { return allocation.index; }),
             model.allocations.allocations());
