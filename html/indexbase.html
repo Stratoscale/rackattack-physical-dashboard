@@ -316,6 +316,14 @@ function updateHosts(statusObject)
 
 function updateRacks(statusObject) {
     var nrHostsPerRow = 2;
+    serverWithMaxNumber = _.max(statusObject.hosts, function(host) {
+        return parseInt(host.id.replace(/rack\d+-server/, ""));
+    });
+    maxServerNumber = parseInt(serverWithMaxNumber.id.replace(/rack\d+-server/, ""));
+    if (maxServerNumber % 2 == 1) {
+        maxServerNumber += 1;
+    }
+    console.log(maxServerNumber);
     serversByRacks = _.groupBy(statusObject.hosts, function(host) {
         var rackNumber = parseInt(host.id.replace("rack", "").replace("-server\d", ""));
         return rackNumber;
@@ -330,10 +338,10 @@ function updateRacks(statusObject) {
         rack = {number: rackNumber, hostsRows: []};
         racksTables.push(rack);
         var row = [];
-        serverWithMaxNumber = _.max(serversByRacks[rackNumber], function(host) {
-            return parseInt(host.id.replace(/rack\d+-server/, ""));
-        });
-        maxServerNumber = parseInt(serverWithMaxNumber.id.replace(/rack\d+-server/, ""));
+        // serverWithMaxNumber = _.max(serversByRacks[rackNumber], function(host) {
+        //    return parseInt(host.id.replace(/rack\d+-server/, ""));
+        //});
+        // maxServerNumber = parseInt(serverWithMaxNumber.id.replace(/rack\d+-server/, ""));
         for (var serverNumber = 1; serverNumber <= maxServerNumber; ++serverNumber) {
             hostElementId = "node-rack" + padWithLeadingZeros(rack.number) + "-server" +
                 padWithLeadingZeros(serverNumber);
