@@ -650,9 +650,13 @@ function Model() {
     });
 
     self.nrHosts = function(pool) {
-        return _.countBy(self.allocations.currentStatus().hosts, function(host) {
+        hosts = _.countBy(self.allocations.currentStatus().hosts, function(host) {
             return host.state == "CHECKED_IN" && host.pool == pool;
         })[true];
+        if (hosts === undefined) {
+            return 0;
+        }
+        return hosts;
     };
 
     self.findAllocationByHostIndex = function(hostIndex) {
