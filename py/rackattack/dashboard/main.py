@@ -13,6 +13,7 @@ parser.add_argument("--realtimewebuiRoot")
 parser.add_argument("--dashboardRoot")
 parser.add_argument("--localhostRackattackProvider", action='store_true')
 parser.add_argument("--localhostRackattackProviderName", type=str, default="Local")
+parser.add_argument("--localhostRackattackProviderOutsideURL", type=str, default="localhost")
 parser.add_argument("--rackattackInstances", type=str)
 args = parser.parse_args()
 
@@ -21,10 +22,12 @@ if args.realtimewebuiRoot is not None:
 
 dashboardSources = list()
 if args.localhostRackattackProvider:
-    dashboardSources.append(dict(name=args.localhostRackattackProviderName, host="localhost"))
+    dashboardSources.append(dict(name=args.localhostRackattackProviderName, innerURL="localhost",
+                                 host=args.localhostRackattackProviderOutsideURL))
 if args.rackattackInstances:
-    dashboardSources.extend(dict(zip(("name", "host"), provider.split(":")))
-                            for provider in args.rackattackInstances.split(','))
+    for providerString in args.rackattackInstances.split(','):
+        name, host = providerString.split(":")
+        dashboardSources.append(dict(name=name, host=host, innerURL=host))
 else:
     raise Exception("Please define one or more rackattack instances")
 
@@ -43,7 +46,7 @@ pollThreads = list()
 for dashboardSource in dashboardSources:
     logging.info("Creating poll thread for %(dashboardSource)s",
                  dict(dashboardSource=dashboardSource["name"]))
-    pollThreads.append(pollthread.PollThread(dashboardSource["name"], dashboardSource["host"]))
+    pollThreads.append(pollthread.PollThread(dashboardSource["name"], dashboardSource["innerURL"]))
 
 render.addTemplateDir(os.path.join(args.dashboardRoot, 'html'))
 render.DEFAULTS['title'] = "Rackattack"

@@ -7,7 +7,7 @@ check_convention:
 	pep8 . --max-line-length=109
 
 test-server:
-	PYTHONPATH=py UPSETO_JOIN_PYTHON_NAMESPACES=yes python py/rackattack/dashboard/main.py --realtimewebuiRoot $(PWD)/../realtimewebui --dashboardRoot $(PWD) --localhostRackattackProvider --localhostRackattackProviderName Bezeq --rackattackInstances RainbowLab:10.16.104.1,SoftLayer:169.53.81.235
+	PYTHONPATH=py UPSETO_JOIN_PYTHON_NAMESPACES=yes python py/rackattack/dashboard/main.py --realtimewebuiRoot $(PWD)/../realtimewebui --dashboardRoot $(PWD) --localhostRackattackProvider --localhostRackattackProviderName Bezeq --localhostRackattackProviderOutsideURL rackattack-provider.dc1 --rackattackInstances RainbowLab:10.16.104.1,SoftLayer:169.53.81.235
 
 test-server-local:
 	RACKATTACK_PROVIDER=tcp://127.0.0.1:1014@@amqp://guest:guest@127.0.0.1:1013/%2F@@http://127.0.0.1:1016 PYTHONPATH=py UPSETO_JOIN_PYTHON_NAMESPACES=yes python py/rackattack/dashboard/main.py --realtimewebuiRoot $(PWD)/../realtimewebui --dashboardRoot $(PWD)
