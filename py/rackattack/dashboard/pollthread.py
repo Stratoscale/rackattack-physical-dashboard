@@ -55,16 +55,28 @@ class PollThread(threading.Thread):
               '"/" -f 6  | cut -d "-" -f 1-2'
         self._searchByCmdWithServerIdInOutput(hosts, cmd, "Bad/Unrecognized SSD")
 
-    def _searchFOrIOErrors(self, hosts):
+    def _searchForIOErrors(self, hosts):
         cmd = 'grep "failed command:" /var/lib/rackattackphysical/seriallogs/ -rn  -l | sort -h | cut -d ' \
               '"/" -f 6  | cut -d "-" -f 1-2'
         self._searchByCmdWithServerIdInOutput(hosts, cmd, "Disk I/O errors detected")
+
+    def _searchForBadBMCs(self, hosts):
+        cmd = 'grep "Unable to establish IPMI" /var/lib/rackattackphysical/seriallogs/ -rn  -l | sort -h | cut -d ' \
+              '"/" -f 6  | cut -d "-" -f 1-2'
+        self._searchByCmdWithServerIdInOutput(hosts, cmd, "Cannot establish an IPMI connection to the BMC")
+
+    def _searchForSlowDisk(self, hosts):
+        cmd = 'grep "link is slow to respond" /var/lib/rackattackphysical/seriallogs/ -rn  -l | sort -h | cut -d ' \
+              '"/" -f 6  | cut -d "-" -f 1-2'
+        self._searchByCmdWithServerIdInOutput(hosts, cmd, "Disk link is slow")
 
     def _searchForWarnings(self, hosts):
         self._lastWarningSearchInterval = time.time()
         self._warnings = dict()
         self._searchForBadSSDs(hosts)
-        self._searchFOrIOErrors(hosts)
+        self._searchForIOErrors(hosts)
+        self._searchForSlowDisk(hosts)
+        self._searchForBadBMCs(hosts)
 
     def _applyCurrentWarnings(self, hosts):
         for host in hosts:
