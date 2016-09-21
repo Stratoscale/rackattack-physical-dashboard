@@ -180,6 +180,9 @@
         <span class="label <%= config.labelClass %> machine-label">
             <span class="glyphicon <%= config.iconClass %>"></span>
             <%= serverNumber  %>
+            <span style="position:absolute; right: 5px; display: <%= machineWarningDisplay %>;">
+            <span class="glyphicon glyphicon-warning-sign" style="color:red;"></span>
+            </span>
         </span>
     </a>
 </script>
@@ -256,6 +259,7 @@ function updateHosts(statusObject)
     var viewMode = model.hostListViewMode();
     var template = _.template( $("#machine-template-" + viewMode).html() );
     activeDashboardHost = model.activeDashboardHost() + ":6001";
+
     $(".machine").popover('destroy').each(function() {
         var serverNumber = $(this).attr("id").replace(/node-rack\d+-server/, "");
         $(this).html(template({
@@ -266,7 +270,8 @@ function updateHosts(statusObject)
                 iconClass: "glyphicon-ban-circle",
                 labelClass: "label-default-light"
             },
-            color: "#b9b9b9"
+            color: "#b9b9b9",
+            machineWarningDisplay: "none"
         }))
     });
 
@@ -282,11 +287,17 @@ function updateHosts(statusObject)
         } else {
             pool = "default";
         }
+        if (hostObject.warnings) {
+            machineWarningDisplay = "inline";
+        } else {
+            machineWarningDisplay = "none";
+        }
         var data = {
             serverID: hostObject.id,
             serverNumber: serverNumber,
             activeDashboardHost: activeDashboardHost,
-            config: stateMap[hostObject.state]
+            config: stateMap[hostObject.state],
+            machineWarningDisplay: machineWarningDisplay
         };
         if (viewMode == "allocation") {
             data["color"] = allocation.color;
@@ -302,6 +313,14 @@ function updateHosts(statusObject)
             content += "<br />Node: " + nodeName;
         }
         content += "<br />Pool: " + pool;
+        if (hostObject.warnings) {
+            content += "<br />Warnings:<ul>";
+            for (idx in hostObject.warnings) {
+                warning = hostObject.warnings[idx];
+                content += "<li>" + warning + "</li>";
+            }
+            content += "</ul>";
+        }
         node.html(template(data));
         node.popover({
             title: hostObject.id,
