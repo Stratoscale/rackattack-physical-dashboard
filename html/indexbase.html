@@ -181,7 +181,7 @@
             <span class="glyphicon <%= config.iconClass %>"></span>
             <%= serverNumber  %>
             <span style="position:absolute; right: 5px; display: <%= machineWarningDisplay %>;">
-            <span class="glyphicon glyphicon-warning-sign" style="color:red;"></span>
+            <span class="glyphicon glyphicon-warning-sign" style="color:red;"><%= nrMachineWarnings %></span>
             </span>
         </span>
     </a>
@@ -271,7 +271,8 @@ function updateHosts(statusObject)
                 labelClass: "label-default-light"
             },
             color: "#b9b9b9",
-            machineWarningDisplay: "none"
+            machineWarningDisplay: "none",
+            nrMachineWarnings: 0
         }))
     });
 
@@ -289,15 +290,18 @@ function updateHosts(statusObject)
         }
         if (hostObject.warnings) {
             machineWarningDisplay = "inline";
+            nrMachineWarnings = hostObject.warnings.length;
         } else {
             machineWarningDisplay = "none";
+            nrMachineWarnings = 0;
         }
         var data = {
             serverID: hostObject.id,
             serverNumber: serverNumber,
             activeDashboardHost: activeDashboardHost,
             config: stateMap[hostObject.state],
-            machineWarningDisplay: machineWarningDisplay
+            machineWarningDisplay: machineWarningDisplay,
+            nrMachineWarnings: nrMachineWarnings
         };
         if (viewMode == "allocation") {
             data["color"] = allocation.color;
@@ -314,12 +318,12 @@ function updateHosts(statusObject)
         }
         content += "<br />Pool: " + pool;
         if (hostObject.warnings) {
-            content += "<br />Warnings:<ul>";
+            content += "<br /><span class='text-danger'>Warnings:<ul>";
             for (idx in hostObject.warnings) {
                 warning = hostObject.warnings[idx];
                 content += "<li>" + warning + "</li>";
             }
-            content += "</ul>";
+            content += "</ul></span>";
         }
         node.html(template(data));
         node.popover({
