@@ -18,6 +18,7 @@ class PollThread(threading.Thread):
         self._name = name
         self._host = host
         self._lastWarningSearchInterval = 0
+        self._warningSearchCounter = 0
         self._warnings = None
         threading.Thread.start(self)
 
@@ -37,15 +38,19 @@ class PollThread(threading.Thread):
             finally:
                 client.close()
 
-    def _searchByCmdWithServerIdInOutput(self, hosts, cmd, message):
+    def _getServersFromCMD(self, cmd):
         try:
-            serversWithBadSSDs = subprocess.check_output(cmd, shell=True, close_fds=True)
+            servers = subprocess.check_output(cmd, shell=True, close_fds=True)
         except:
             logging.error("Could not execute command:")
             logging.error(cmd)
             logging.error(traceback.format_exc())
             return
-        for serverID in serversWithBadSSDs.splitlines():
+        return servers
+
+    def _searchByCmdWithServerIdInOutput(self, hosts, cmd, message):
+        servers = self._getServersFromCMD(cmd)
+        for serverID in servers.splitlines():
             server = [host for host in hosts if host["id"] == serverID]
             if server:
                 self._warnings.setdefault(serverID, list()).append(message)
@@ -70,13 +75,28 @@ class PollThread(threading.Thread):
               '"/" -f 6  | cut -d "-" -f 1-2'
         self._searchByCmdWithServerIdInOutput(hosts, cmd, "Disk link is slow")
 
+    def _searchServersWithoutInaugurator(self, hosts):
+        cmd = 'find `grep "Linux version" -rl /var/lib/rackattackphysical/seriallogs/`  -exec  grep  -H -E -o -c ' \
+              ' "Inaugurator stage"  {} \; | grep ":0" | cut -d "/" -f 6 | cut -d "-" -f 1-2'
+        message = "Inaugurator boot was not discovered. It is possible that the server does not boot from PXE"
+        servers = self._getServersFromCMD(cmd)
+        for serverID in servers.splitlines():
+            server = [host for host in hosts if host["id"] == serverID]
+            if server:
+                server = server[0]
+                if server["state"] not in ("DETACHED",):
+                    self._warnings.setdefault(serverID, list()).append(message)
+
     def _searchForWarnings(self, hosts):
         self._lastWarningSearchInterval = time.time()
+        self._warningSearchCounter += 1
         self._warnings = dict()
         self._searchForBadSSDs(hosts)
         self._searchForIOErrors(hosts)
         self._searchForSlowDisk(hosts)
         self._searchForBadBMCs(hosts)
+        if self._warningSearchCounter > 1:
+            self._searchServersWithoutInaugurator(hosts)
 
     def _applyCurrentWarnings(self, hosts):
         for host in hosts:
