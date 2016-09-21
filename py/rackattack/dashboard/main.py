@@ -12,17 +12,19 @@ parser.add_argument("--webSocketPort", type=int, default=6002)
 parser.add_argument("--realtimewebuiRoot")
 parser.add_argument("--dashboardRoot")
 parser.add_argument("--localhostRackattackProvider", action='store_true')
+parser.add_argument("--localhostRackattackProviderName", type=str, default="Local")
 parser.add_argument("--rackattackInstances", type=str)
 args = parser.parse_args()
 
 if args.realtimewebuiRoot is not None:
     realtimewebui.config.REALTIMEWEBUI_ROOT_DIRECTORY = args.realtimewebuiRoot
 
+dashboardSources = list()
 if args.localhostRackattackProvider:
-    dashboardSources = [dict(name="Local", host="localhost")]
-elif args.rackattackInstances:
-    dashboardSources = [dict(zip(("name", "host"), provider.split(":")))
-                        for provider in args.rackattackInstances.split(',')]
+    dashboardSources.append(dict(name=args.localhostRackattackProviderName, host="localhost"))
+if args.rackattackInstances:
+    dashboardSources.extend(dict(zip(("name", "host"), provider.split(":")))
+                            for provider in args.rackattackInstances.split(','))
 else:
     raise Exception("Please define one or more rackattack instances")
 
