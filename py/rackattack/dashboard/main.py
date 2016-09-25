@@ -28,7 +28,7 @@ if args.rackattackInstances:
     for providerString in args.rackattackInstances.split(','):
         name, host = providerString.split(":")
         dashboardSources.append(dict(name=name, host=host, innerURL=host))
-else:
+if not dashboardSources:
     raise Exception("Please define one or more rackattack instances")
 
 
