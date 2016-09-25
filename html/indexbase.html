@@ -272,7 +272,8 @@ function updateHosts(statusObject)
             },
             color: "#b9b9b9",
             machineWarningDisplay: "none",
-            nrMachineWarnings: 0
+            nrMachineWarnings: 0,
+            reasonForDestruction: ""
         }))
     });
 
@@ -324,6 +325,9 @@ function updateHosts(statusObject)
                 content += "<li>" + warning + "</li>";
             }
             content += "</ul></span>";
+        }
+        if (hostObject.reasonForDestruction) {
+            content += "<div class='text-danger'>Reason for destruction: " + hostObject.reasonForDestruction + "</span>";
         }
         node.html(template(data));
         node.popover({
