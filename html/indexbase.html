@@ -209,6 +209,73 @@
                     </div> <!-- panel-body //-->
                 </div> <!-- collapse //-->
             </div> <!-- panel //-->
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        <a data-toggle="collapse" data-parent="#accordion" href="#collapse3">Diagnostics</a>
+                    </h3>
+                </div>
+                <div id="collapse3" class="panel-collapse collapse">
+                    <div class="panel-body">
+                        <h4>Destroyed Hosts</h4>
+                        <table class="table">
+                            <tbody data-bind="foreach: { data: diagnostics.destructions() }">
+                                <tr>
+                                    <td>
+                                        <div class="media">
+                                            <a class="media-left pull-left" href="#">
+                                                <div class="color-swatch" data-bind="text: hosts.length"></div>
+                                            </a>
+                                            <div class="media-body">
+                                                <div class="media-heading" data-bind="text: reason"> </div>
+                                                <ul class="host-list list-group" data-bind="foreach: { data: hosts }">
+                                                    <li class="list-group-item">
+                                                        <span class="host-icon" data-bind="css: labelClass.replace('label', 'text')">
+                                                            <span class="glyphicon" data-bind="css: iconClass"></span>
+                                                        </span>
+                                                        <span data-bind="text: id"></span>
+                                                        <span class="badge">
+                                                            <span data-bind="text: ipAddress"></span>
+                                                        </span>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <h4>Warning Indications</h4>
+                        <table class="table">
+                            <tbody data-bind="foreach: { data: diagnostics.indications() }">
+                                <tr>
+                                    <td>
+                                        <div class="media">
+                                            <a class="media-left pull-left" href="#">
+                                                <div class="color-swatch" data-bind="text: hosts.length"></div>
+                                            </a>
+                                            <div class="media-body">
+                                                <div class="media-heading" data-bind="text: title"> </div>
+                                                <ul class="host-list list-group" data-bind="foreach: { data: hosts }">
+                                                    <li class="list-group-item">
+                                                        <span class="host-icon" data-bind="css: labelClass.replace('label', 'text')">
+                                                            <span class="glyphicon" data-bind="css: iconClass"></span>
+                                                        </span>
+                                                        <span data-bind="text: id"></span>
+                                                        <span class="badge">
+                                                            <span data-bind="text: ipAddress"></span>
+                                                        </span>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div> <!-- panel-body //-->
+                </div> <!-- collapse //-->
+            </div> <!-- panel //-->
         </div> <!-- Accordion //-->
     </div> <!-- row //-->
 </div> <!-- container //-->
@@ -277,6 +344,7 @@ function setStatus(statusObject)
     model.pools.update(statusObject);
     updateHosts(statusObject);
     model.allocations.update(statusObject);
+    model.diagnostics.update(statusObject);
 }
 
 var hostsByIndex = {};
@@ -649,20 +717,20 @@ function Pool(poolName, hosts, color)
     };
 }
 
+function addLabelClass(hosts, statusObject) {
+    for (idx in hosts) {
+        host = hosts[idx];
+        host["iconClass"] = stateMap[host.state]["iconClass"];
+        host["labelClass"] = stateMap[host.state]["labelClass"];
+    }
+}
+
 function PoolsModel() {
     var self = this;
     self.pools = ko.observableArray();
 
     self.reset = function() {
         self.pools.removeAll();
-    }
-
-    self.addLabelClass = function(hosts, statusObject) {
-        for (idx in hosts) {
-            host = hosts[idx];
-            host["iconClass"] = stateMap[host.state]["iconClass"];
-            host["labelClass"] = stateMap[host.state]["labelClass"];
-        }
     }
 
     self.update = function(statusObject)
@@ -680,7 +748,7 @@ function PoolsModel() {
         for (poolName in colorsPairs) {
             hostsByPools = _.groupBy(statusObject.hosts, function(host) { return host.pool; });
             hostsInPool = hostsByPools[poolName];
-            self.addLabelClass(hostsInPool);
+            addLabelClass(hostsInPool, statusObject);
             pool = new Pool(poolName, hostsInPool, colorsPairs[poolName]);
             pools.push(pool)
         }
@@ -696,6 +764,75 @@ function PoolsModel() {
     }
 }
 
+function DiagnosticsModel() {
+    var self = this;
+    self.indications = ko.observableArray();
+    self.destructions = ko.observableArray();
+
+    self.reset = function() {
+        self.indications.removeAll();
+    }
+
+    self.update = function(statusObject)
+    {
+        self.updateIndications(statusObject);
+        self.updateDestructions(statusObject);
+    }
+
+    self.updateIndications = function(statusObject) {
+        hostsPerIndication = {}
+        _.each(statusObject.hosts, function(host) {
+            if (!("warnings" in host)) {
+                return;
+            }
+            _.each(host["warnings"], function(indication) {
+                if (!(indication in hostsPerIndication)) {
+                    hostsPerIndication[indication] = new Array();
+                }
+                hostsPerIndication[indication].push(host);
+            });
+        });
+        for (var indication in hostsPerIndication) {
+            addLabelClass(hostsPerIndication[indication], statusObject);
+        }
+        var indicationsModel = [];
+        for (var indication in hostsPerIndication) {
+            indicationModel = {hosts: hostsPerIndication[indication], title: indication}
+            indicationsModel.push(indicationModel)
+        }
+        self.indications(indicationsModel);
+    };
+
+    self.updateDestructions = function(statusObject) {
+        hostsPerDestructionReason = {}
+        _.each(statusObject.hosts, function(host) {
+            if (!("reasonForDestruction" in host)) {
+                return;
+            }
+            reason = host["reasonForDestruction"];
+            if ("DESTROYED" != host["state"]) {
+                return;
+            }
+            if (!reason) {
+                return;
+            }
+            if (!(reason in hostsPerDestructionReason)) {
+                hostsPerDestructionReason[reason] = new Array();
+            }
+            hostsPerDestructionReason[reason].push(host);
+        });
+        for (var reason in hostsPerDestructionReason) {
+            addLabelClass(hostsPerDestructionReason[reason], statusObject);
+        }
+        var destructionModel = [];
+        for (var reason in hostsPerDestructionReason) {
+            destruction = {hosts: hostsPerDestructionReason[reason], reason: reason}
+            destructionModel.push(destruction)
+        }
+        self.destructions(destructionModel);
+    };
+}
+
 function Model() {
     var self = this;
     self.allocations = new AllocationsModel();
@@ -703,6 +840,7 @@ function Model() {
     self.racks = ko.observableArray([]);
     self.activeDashboardName = ko.observable();
     self.activeDashboardHost = ko.observable();
+    self.diagnostics = new DiagnosticsModel();
     theme = Cookies.get("theme");
     if (theme === undefined) {
         theme = "light";
@@ -765,6 +903,7 @@ function Model() {
         model.allocations.reset();                                                                           
         wereRacksUpdated = false;                                                                            
         self.pools.reset(); 
+        self.diagnostics.reset();
         _.each(rackattackInstances, function(instance) {
             if (instance["name"] == dashboardName) {
                 self.activeDashboardHost(instance["host"]);
