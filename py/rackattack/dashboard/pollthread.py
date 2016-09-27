@@ -87,6 +87,11 @@ class PollThread(threading.Thread):
                 if server["state"] not in ("DETACHED",):
                     self._warnings.setdefault(serverID, list()).append(message)
 
+    def _searchServersWithEmptySOLOutput(self, hosts):
+        cmd = 'md5sum /var/lib/rackattackphysical/seriallogs/* | grep 1ace526a4c42a70aed17fdbb15967936 | cut -d ' \
+              '"/" -f 6 | cut -d "-" -f 1-2'
+        self._searchByCmdWithServerIdInOutput(hosts, cmd, "SOL output is empty")
+
     def _searchForWarnings(self, hosts):
         self._lastWarningSearchInterval = time.time()
         self._warningSearchCounter += 1
@@ -95,6 +100,7 @@ class PollThread(threading.Thread):
         self._searchForIOErrors(hosts)
         self._searchForSlowDisk(hosts)
         self._searchForBadBMCs(hosts)
+        self._searchServersWithEmptySOLOutput(hosts)
         if self._warningSearchCounter > 1:
             self._searchServersWithoutInaugurator(hosts)
 
