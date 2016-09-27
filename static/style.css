@@ -111,6 +111,18 @@ label {
 .badge-primary {
     background-color: #428bca;
 }
+.badge-danger {
+    background-color: #a94442;
+}
+.badge-dark {
+    background-color: black;
+}
+.badge-success {
+    background-color: #5cb85c;
+}
+.badge-detached {
+    background-color: #2f4f4f;
+}
 
 .allocation-row .host-icon {
     display: inline;

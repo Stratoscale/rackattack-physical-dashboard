@@ -21,7 +21,6 @@
     </div>
     <div class="row">
         <div class="col-md-6">
-            <h3>Free hosts in default pool: <span class="badge badge-primary" data-bind="text: nrHosts('default', 'CHECKED_IN')"></span></h3>
             <div class="radio-inline">
                 <label>
                     <input type="radio" name="hostViewOptions" value="state" data-bind="checked: hostListViewMode" >
@@ -86,8 +85,35 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-6">
-            <h3>Allocations <span class="badge" data-bind="text: allocations.allocations().length"> </span></h3>
+        <div class="col-md-6 panel-group" id="accordion">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">
+                    Stats
+                </h3>
+            </div>
+            <div class="panel-body">
+                <ul class="list-group">
+                    <li class="list-group-item"><span class="label label-primary"><span class="glyphicon glyphicon-pause"></span>Checked In</span> (idle) hosts in default pool: <span class="badge badge-primary" data-bind="text: nrHosts('default', 'CHECKED_IN')"></span></li>
+                    <li class="list-group-item"><span class="label label-primary"><span class="glyphicon glyphicon-pause"></span>Checked In</span> (idle) hosts: <span class="badge badge-primary" data-bind="text: nrHosts('', 'CHECKED_IN')"></span></li>
+                    <li class="list-group-item"><span class="label label-danger"><span class="glyphicon glyphicon-remove"></span>Destroyed</span> hosts: <span class="badge badge-danger" data-bind="text: nrHosts('', 'DESTROYED')"></span></li>
+                    <li class="list-group-item"><span class="label label-default-dark"><span class="glyphicon glyphicon-off"></span>Offline</span> hosts: <span class="badge badge-dark" data-bind="text: nrHosts('', 'OFFLINE')"></span></li>
+                    <li class="list-group-item">Allocated (<span class="label label-success"><span class="glyphicon glyphicon-ok"></span>Inauguration Done</span>) hosts: <span class="badge badge-success" data-bind="text: nrHosts('', 'INAUGURATION_DONE')"></span></li>
+                    <li class="list-group-item"><span class="label label-detached"><span class="glyphicon glyphicon-eject"></span>Detached</span> hosts: <span class="badge badge-detached" data-bind="text: nrHosts('', 'DETACHED')"></span></li>
+                </ul>
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse1">
+                        Allocations
+                    </a>
+                    <span class="badge" data-bind="text: allocations.allocations().length"> </span>
+                </h3>
+            </div>
+            <div id="collapse1" class="panel-collapse collapse in">
+            <div class="panel-body">
             <table class="table">
                 <thead>
                     <tr>
@@ -138,9 +164,20 @@
                     </tr>
                 </tbody>
             </table>
+            </div>
+            </div>
         </div>
-        <div class="col-md-6">
-            <h3>Pools <span class="badge" data-bind="text: pools.pools().length"> </span></h3>
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse2">
+                        Pools
+                    </a>
+                    <span class="badge" data-bind="text: pools.pools().length"> </span>
+                </h3>
+            </div>
+            <div id="collapse2" class="panel-collapse collapse">
+            <div class="panel-body">
             <table class="table">
                 <tbody data-bind="foreach: { data: pools.pools() }">
                     <tr data-bind="event: { mouseenter: mouseOver, mouseleave: mouseOut }" class="allocation-row">
@@ -171,7 +208,10 @@
                     </tr>
                 </tbody>
             </table>
+            </div>
+            </div>
         </div>
+        </div> <!-- Accordion //-->
     </div>
 </div>
 
@@ -676,9 +716,13 @@ function Model() {
         updateHosts(self.allocations.currentStatus());
     });
 
-    self.nrHosts = function(pool) {
+    self.nrHosts = function(pool, state) {
         hosts = _.countBy(self.allocations.currentStatus().hosts, function(host) {
-            return host.state == "CHECKED_IN" && host.pool == pool;
+            var condition = host.state == state;
+            if (pool) {
+                condition = condition && (host.pool == pool);
+            }
+            return condition;
         })[true];
         if (hosts === undefined) {
             return 0;
