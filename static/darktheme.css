@@ -1,6 +1,6 @@
 .dark {
     color: #cccccc;
-    background-color: black;
+    background-color: #232323;
 }
 .popover-content, .popover-title, .hosts-list {
     color: black;
@@ -9,5 +9,7 @@
     background-color: #232323;
 }
 .list-group .list-group-item {
+.dark .list-group-item {
     background-color: #232323;
+    color: #cccccc;
 }
