@@ -94,12 +94,12 @@
             </div>
             <div class="panel-body">
                 <ul class="list-group">
-                    <li class="list-group-item"><span class="label label-primary"><span class="glyphicon glyphicon-pause"></span>Checked In</span> (idle) hosts in default pool: <span class="badge badge-primary" data-bind="text: nrHosts('default', 'CHECKED_IN')"></span></li>
-                    <li class="list-group-item"><span class="label label-primary"><span class="glyphicon glyphicon-pause"></span>Checked In</span> (idle) hosts: <span class="badge badge-primary" data-bind="text: nrHosts('', 'CHECKED_IN')"></span></li>
-                    <li class="list-group-item"><span class="label label-danger"><span class="glyphicon glyphicon-remove"></span>Destroyed</span> hosts: <span class="badge badge-danger" data-bind="text: nrHosts('', 'DESTROYED')"></span></li>
-                    <li class="list-group-item"><span class="label label-default-dark"><span class="glyphicon glyphicon-off"></span>Offline</span> hosts: <span class="badge badge-dark" data-bind="text: nrHosts('', 'OFFLINE')"></span></li>
-                    <li class="list-group-item">Allocated (<span class="label label-success"><span class="glyphicon glyphicon-ok"></span>Inauguration Done</span>) hosts: <span class="badge badge-success" data-bind="text: nrHosts('', 'INAUGURATION_DONE')"></span></li>
-                    <li class="list-group-item"><span class="label label-detached"><span class="glyphicon glyphicon-eject"></span>Detached</span> hosts: <span class="badge badge-detached" data-bind="text: nrHosts('', 'DETACHED')"></span></li>
+                    <li class="list-group-item"><span class="label label-primary"><span class="glyphicon glyphicon-pause"> </span> Available</span> (checked in) hosts in default pool: <span class="badge badge-primary" data-bind="text: nrHosts('default', 'CHECKED_IN')"></span></li>
+                    <li class="list-group-item"><span class="label label-primary"><span class="glyphicon glyphicon-pause"> </span> Available</span> (checked in) hosts: <span class="badge badge-primary" data-bind="text: nrHosts('', 'CHECKED_IN')"></span></li>
+                    <li class="list-group-item"><span class="label label-danger"><span class="glyphicon glyphicon-remove"> </span> Destroyed</span> hosts: <span class="badge badge-danger" data-bind="text: nrHosts('', 'DESTROYED')"></span></li>
+                    <li class="list-group-item"><span class="label label-default-dark"><span class="glyphicon glyphicon-off"> </span> Offline</span> hosts: <span class="badge badge-dark" data-bind="text: nrHosts('', 'OFFLINE')"></span></li>
+                    <li class="list-group-item"><span class="label label-success"><span class="glyphicon glyphicon-ok"> </span> In-use</span> (Inauguration Done) hosts: <span class="badge badge-success" data-bind="text: nrHosts('', 'INAUGURATION_DONE')"></span></li>
+                    <li class="list-group-item"><span class="label label-detached"><span class="glyphicon glyphicon-eject"> </span> Detached</span> hosts: <span class="badge badge-detached" data-bind="text: nrHosts('', 'DETACHED')"></span></li>
                 </ul>
             </div>
         </div>
