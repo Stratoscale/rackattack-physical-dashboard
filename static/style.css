@@ -134,14 +134,14 @@ label {
     margin-top: 13px;
 }
 .panel-group .panel-heading a:after {
-    content: '+';
+    content: '-';
     position: absolute;
     right: 20px;
     top:5px;
 	font-size: 20pt;
 }
 .panel-group .panel-heading a.collapsed:after {
-    content: '-';
+    content: '+';
 }
 .panel-heading {
     position: relative;
