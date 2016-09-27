@@ -100,6 +100,8 @@
                         <li class="list-group-item"><span class="label label-default-dark"><span class="glyphicon glyphicon-off"> </span> Offline</span> hosts: <span class="badge badge-dark" data-bind="text: nrHosts('', 'OFFLINE')"></span></li>
                         <li class="list-group-item"><span class="label label-success"><span class="glyphicon glyphicon-ok"> </span> In-use</span> (Inauguration Done) hosts: <span class="badge badge-success" data-bind="text: nrHosts('', 'INAUGURATION_DONE')"></span></li>
                         <li class="list-group-item"><span class="label label-detached"><span class="glyphicon glyphicon-eject"> </span> Detached</span> hosts: <span class="badge badge-detached" data-bind="text: nrHosts('', 'DETACHED')"></span></li>
+                        <li class="list-group-item">Total Nr. of hosts: <span class="badge badge" data-bind="text: nrHosts('', '')"></span></li>
+                        <li class="list-group-item">Current hosts usage: <span class="badge badge" data-bind="text: (((nrHosts('', 'INAUGURATION_DONE') + nrHosts('', 'DETACHED')) / nrHosts('', '')).toFixed(2) * 100).toString() + '%'"></span></li>
                     </ul>
                 </div>
             </div>
@@ -713,16 +715,20 @@ function Model() {
     });
 
     self.nrHosts = function(pool, state) {
-        hosts = _.countBy(self.allocations.currentStatus().hosts, function(host) {
+        hosts = self.allocations.currentStatus().hosts;
+        if (hosts === undefined) {
+            return 0;
+        }
+        if (!pool && !state) {
+            return hosts.length;
+        }
+        hosts = _.countBy(hosts, function(host) {
             var condition = host.state == state;
             if (pool) {
                 condition = condition && (host.pool == pool);
             }
             return condition;
         })[true];
-        if (hosts === undefined) {
-            return 0;
-        }
         return hosts;
     };
 
