@@ -86,134 +86,134 @@
             </div>
         </div>
         <div class="col-md-6 panel-group" id="accordion">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title">
-                    Stats
-                </h3>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        Stats
+                    </h3>
+                </div>
+                <div class="panel-body">
+                    <ul class="list-group">
+                        <li class="list-group-item"><span class="label label-primary"><span class="glyphicon glyphicon-pause"> </span> Available</span> (checked in) hosts in default pool: <span class="badge badge-primary" data-bind="text: nrHosts('default', 'CHECKED_IN')"></span></li>
+                        <li class="list-group-item"><span class="label label-primary"><span class="glyphicon glyphicon-pause"> </span> Available</span> (checked in) hosts: <span class="badge badge-primary" data-bind="text: nrHosts('', 'CHECKED_IN')"></span></li>
+                        <li class="list-group-item"><span class="label label-danger"><span class="glyphicon glyphicon-remove"> </span> Destroyed</span> hosts: <span class="badge badge-danger" data-bind="text: nrHosts('', 'DESTROYED')"></span></li>
+                        <li class="list-group-item"><span class="label label-default-dark"><span class="glyphicon glyphicon-off"> </span> Offline</span> hosts: <span class="badge badge-dark" data-bind="text: nrHosts('', 'OFFLINE')"></span></li>
+                        <li class="list-group-item"><span class="label label-success"><span class="glyphicon glyphicon-ok"> </span> In-use</span> (Inauguration Done) hosts: <span class="badge badge-success" data-bind="text: nrHosts('', 'INAUGURATION_DONE')"></span></li>
+                        <li class="list-group-item"><span class="label label-detached"><span class="glyphicon glyphicon-eject"> </span> Detached</span> hosts: <span class="badge badge-detached" data-bind="text: nrHosts('', 'DETACHED')"></span></li>
+                    </ul>
+                </div>
             </div>
-            <div class="panel-body">
-                <ul class="list-group">
-                    <li class="list-group-item"><span class="label label-primary"><span class="glyphicon glyphicon-pause"> </span> Available</span> (checked in) hosts in default pool: <span class="badge badge-primary" data-bind="text: nrHosts('default', 'CHECKED_IN')"></span></li>
-                    <li class="list-group-item"><span class="label label-primary"><span class="glyphicon glyphicon-pause"> </span> Available</span> (checked in) hosts: <span class="badge badge-primary" data-bind="text: nrHosts('', 'CHECKED_IN')"></span></li>
-                    <li class="list-group-item"><span class="label label-danger"><span class="glyphicon glyphicon-remove"> </span> Destroyed</span> hosts: <span class="badge badge-danger" data-bind="text: nrHosts('', 'DESTROYED')"></span></li>
-                    <li class="list-group-item"><span class="label label-default-dark"><span class="glyphicon glyphicon-off"> </span> Offline</span> hosts: <span class="badge badge-dark" data-bind="text: nrHosts('', 'OFFLINE')"></span></li>
-                    <li class="list-group-item"><span class="label label-success"><span class="glyphicon glyphicon-ok"> </span> In-use</span> (Inauguration Done) hosts: <span class="badge badge-success" data-bind="text: nrHosts('', 'INAUGURATION_DONE')"></span></li>
-                    <li class="list-group-item"><span class="label label-detached"><span class="glyphicon glyphicon-eject"> </span> Detached</span> hosts: <span class="badge badge-detached" data-bind="text: nrHosts('', 'DETACHED')"></span></li>
-                </ul>
-            </div>
-        </div>
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title">
-                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse1">
-                        Allocations
-                    </a>
-                    <span class="badge" data-bind="text: allocations.allocations().length"> </span>
-                </h3>
-            </div>
-            <div id="collapse1" class="panel-collapse collapse in">
-            <div class="panel-body">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Allocation</th>
-                        <th>State</th>
-                        <th>Duration</th>
-                    </tr>
-                </thead>
-                <tbody data-bind="foreach: { data: allocations.allocations }">
-                    <tr data-bind="attr: { allocationIndex: index }, event: { mouseenter: mouseOver, mouseleave: mouseOut }" class="allocation-row">
-                        <td>
-                            <div class="media">
-                                <a class="media-left pull-left" href="#">
-                                    <div class="color-swatch" data-bind="text: countHosts(), style: { backgroundColor: color }"></div>
-                                </a>
-                                <div class="media-body">
-                                    <div class="media-heading" data-bind="text: info.user"> </div>
-                                    <ul class="hosts-list list-group" data-bind="foreach: { data: listHosts(), afterAdd: postRender }">
-                                        <li class="list-group-item">
-                                            <span class="host-icon " data-bind="css: config.labelClass.replace('label', 'text')">
-                                                <span class="glyphicon" data-bind="css: config.iconClass"></span>
-                                            </span>
-                                            <span class="test-name" data-bind="text: testName"></span> (<span data-bind="text: hostName"></span>)
-                                            <div class="pull-right copy-command" data-bind="if: hostState == 'INAUGURATION_DONE'" title="Click to copy to the clipboard a connection command to this node">
-                                                <span class="glyphicon glyphicon-circle-arrow-right connect-link" ></span>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        <a data-toggle="collapse" data-parent="#accordion" href="#collapse1">
+                            Allocations
+                        </a>
+                        <span class="badge" data-bind="text: allocations.allocations().length"> </span>
+                    </h3>
+                </div>
+                <div id="collapse1" class="panel-collapse collapse in">
+                    <div class="panel-body">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Allocation</th>
+                                    <th>State</th>
+                                    <th>Duration</th>
+                                </tr>
+                            </thead>
+                            <tbody data-bind="foreach: { data: allocations.allocations }">
+                                <tr data-bind="attr: { allocationIndex: index }, event: { mouseenter: mouseOver, mouseleave: mouseOut }" class="allocation-row">
+                                    <td>
+                                        <div class="media">
+                                            <a class="media-left pull-left" href="#">
+                                                <div class="color-swatch" data-bind="text: countHosts(), style: { backgroundColor: color }"></div>
+                                            </a>
+                                            <div class="media-body">
+                                                <div class="media-heading" data-bind="text: info.user"> </div>
+                                                <ul class="hosts-list list-group" data-bind="foreach: { data: listHosts(), afterAdd: postRender }">
+                                                    <li class="list-group-item">
+                                                        <span class="host-icon " data-bind="css: config.labelClass.replace('label', 'text')">
+                                                            <span class="glyphicon" data-bind="css: config.iconClass"></span>
+                                                        </span>
+                                                        <span class="test-name" data-bind="text: testName"></span> (<span data-bind="text: hostName"></span>)
+                                                        <div class="pull-right copy-command" data-bind="if: hostState == 'INAUGURATION_DONE'" title="Click to copy to the clipboard a connection command to this node">
+                                                            <span class="glyphicon glyphicon-circle-arrow-right connect-link" ></span>
+                                                        </div>
+                                                        <span class="badge">
+                                                            <span data-bind="text: ip"></span>
+                                                        </span>
+                                                    </li>
+                                                </ul>
                                             </div>
-                                            <span class="badge">
-                                                <span data-bind="text: ip"></span>
-                                            </span>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="state-column">
-                            <div data-bind="if: dead()">
-                                <span class="label label-danger"> DEAD </span>
-                            </div>
-                            <div data-bind="if: ! dead() && done()">
-                                <span class="label label-success" > DONE </span>
-                            </div>
-                            <div data-bind="if: ! dead() && ! done()">
-                                <span class="label label-primary" > WAIT </span>
-                            </div>
-                        </td>
-                        <td data-bind="text: duration">
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                                        </div>
+                                    </td>
+                                    <td class="state-column">
+                                        <div data-bind="if: dead()">
+                                            <span class="label label-danger"> DEAD </span>
+                                        </div>
+                                        <div data-bind="if: ! dead() && done()">
+                                            <span class="label label-success" > DONE </span>
+                                        </div>
+                                        <div data-bind="if: ! dead() && ! done()">
+                                            <span class="label label-primary" > WAIT </span>
+                                        </div>
+                                    </td>
+                                    <td data-bind="text: duration">
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
-            </div>
-        </div>
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title">
-                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse2">
-                        Pools
-                    </a>
-                    <span class="badge" data-bind="text: pools.pools().length"> </span>
-                </h3>
-            </div>
-            <div id="collapse2" class="panel-collapse collapse">
-            <div class="panel-body">
-            <table class="table">
-                <tbody data-bind="foreach: { data: pools.pools() }">
-                    <tr data-bind="event: { mouseenter: mouseOver, mouseleave: mouseOut }" class="allocation-row">
-                        <td>
-                            <div class="media">
-                                <a class="media-left pull-left" href="#">
-                                    <div class="color-swatch" data-bind="text: hosts.length, style: { backgroundColor: color }"></div>
-                                </a>
-                                <div class="media-body">
-                                    <div class="media-heading" data-bind="text: name"> </div>
-                                    <ul class="hosts-list list-group" data-bind="foreach: { data: hosts, afterAdd: postRender }">
-                                        <li class="list-group-item">
-                                            <span class="host-icon " data-bind="css: labelClass.replace('label', 'text')">
-                                                <span class="glyphicon" data-bind="css: iconClass"></span>
-                                            </span>
-                                            <span data-bind="text: id"></span>
-                                            <div class="pull-right copy-command" data-bind="if: state == 'INAUGURATION_DONE'" title="Click to copy to the clipboard a connection command to this node">
-                                                <span class="glyphicon glyphicon-circle-arrow-right connect-link" ></span>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        <a data-toggle="collapse" data-parent="#accordion" href="#collapse2">
+                            Pools
+                        </a>
+                        <span class="badge" data-bind="text: pools.pools().length"> </span>
+                    </h3>
+                </div>
+                <div id="collapse2" class="panel-collapse collapse">
+                    <div class="panel-body">
+                        <table class="table">
+                            <tbody data-bind="foreach: { data: pools.pools() }">
+                                <tr data-bind="event: { mouseenter: mouseOver, mouseleave: mouseOut }" class="allocation-row">
+                                    <td>
+                                        <div class="media">
+                                            <a class="media-left pull-left" href="#">
+                                                <div class="color-swatch" data-bind="text: hosts.length, style: { backgroundColor: color }"></div>
+                                            </a>
+                                            <div class="media-body">
+                                                <div class="media-heading" data-bind="text: name"> </div>
+                                                <ul class="hosts-list list-group" data-bind="foreach: { data: hosts, afterAdd: postRender }">
+                                                    <li class="list-group-item">
+                                                        <span class="host-icon " data-bind="css: labelClass.replace('label', 'text')">
+                                                            <span class="glyphicon" data-bind="css: iconClass"></span>
+                                                        </span>
+                                                        <span data-bind="text: id"></span>
+                                                        <div class="pull-right copy-command" data-bind="if: state == 'INAUGURATION_DONE'" title="Click to copy to the clipboard a connection command to this node">
+                                                            <span class="glyphicon glyphicon-circle-arrow-right connect-link" ></span>
+                                                        </div>
+                                                        <span class="badge">
+                                                            <span data-bind="text: ipAddress"></span>
+                                                        </span>
+                                                    </li>
+                                                </ul>
                                             </div>
-                                            <span class="badge">
-                                                <span data-bind="text: ipAddress"></span>
-                                            </span>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            </div>
-            </div>
-        </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div> <!-- panel-body //-->
+                </div> <!-- collapse //-->
+            </div> <!-- panel //-->
         </div> <!-- Accordion //-->
-    </div>
-</div>
+    </div> <!-- row //-->
+</div> <!-- container //-->
 
 <script type="text/html" id="machine-template-state">
     <a class="machine-link" href="http://<%= activeDashboardHost %>/seriallogs/<%= serverID %>-serial.txt" target="_new">
