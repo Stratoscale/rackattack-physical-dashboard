@@ -143,6 +143,10 @@ label {
 .panel-group .panel-heading a.collapsed:after {
     content: '+';
 }
+.panel-group .panel-heading a {
+    width: 100%;
+    display: block;
+}
 .panel-heading {
     position: relative;
 }
