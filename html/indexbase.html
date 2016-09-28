@@ -59,7 +59,7 @@
                             <li class="list-group-item"><span class="label label-success"><span class="glyphicon glyphicon-ok"> </span> In-use</span> (Inauguration Done) hosts: <span class="badge badge-success" data-bind="text: nrHosts('', 'INAUGURATION_DONE')"></span></li>
                             <li class="list-group-item"><span class="label label-detached"><span class="glyphicon glyphicon-eject"> </span> Detached</span> hosts: <span class="badge badge-detached" data-bind="text: nrHosts('', 'DETACHED')"></span></li>
                             <li class="list-group-item">Total Nr. of hosts: <span class="badge badge" data-bind="text: nrHosts('', '')"></span></li>
-                            <li class="list-group-item">Current hosts usage: <span class="badge badge" data-bind="text: (((nrHosts('', 'INAUGURATION_DONE') + nrHosts('', 'DETACHED')) / nrHosts('', '')).toFixed(2) * 100).toString() + '%'"></span></li>
+                            <li class="list-group-item">Current hosts usage: <span class="badge badge" data-bind="text: (((nrHosts('', 'INAUGURATION_DONE') + nrHosts('', 'DETACHED')) / nrHosts('', '')) * 100).toFixed(0).toString() + '%'"></span></li>
                         </ul>
                     </div>
                 </div>
