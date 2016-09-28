@@ -873,6 +873,9 @@ function Model() {
             }
             return condition;
         })[true];
+        if (hosts === undefined) {
+            return 0;
+        }
         return hosts;
     };
 
