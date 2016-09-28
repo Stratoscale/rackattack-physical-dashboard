@@ -41,78 +41,37 @@
             </div>
             {% block rack %}{% endblock %}
             <p></p>
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">Legend</h3>
-                </div>
-                <div class="panel-body">
-                    <p><span class="label label-info"><span class="glyphicon glyphicon-backward"></span> QUICK_RECLAIMATION_IN_PROGRESS</span></p>
-                    <p>Quick reclaim works using kexecing the inaugurator on the host
-                    <p>
-                    <p><span class="label label-warning"><span class="glyphicon glyphicon-fast-backward"></span> SLOW_RECLAIMATION_IN_PROGRESS</span></p>
-                    <p>
-                        Slow reclaim works by rebooting the server and using PXE to load the inaugurator.
-                        This is slow since a server takes minutes to reboot, plus, more than one reboot
-                        might be required.
-                    </p>
-                    <p><span class="label label-primary"><span class="glyphicon glyphicon-pause"></span> CHECKED_IN</span></p>
-                    <p>
-                        The inaugurator has booted successfully, and is waiting for the command to switch
-                        a rootfs. The current rootfs is being hashed in the background.
-                    </p>
-                    <p><span class="label label-info"><span class="glyphicon glyphicon-play"></span> INAUGURATION_LABEL_PROVIDED</span></p>
-                    <p>
-                        The inaugurator is replacing the rootfs in this host.
-                    </p>
-                    <p><span class="label label-success"><span class="glyphicon glyphicon-ok"></span> INAUGURATION_DONE</span></p>
-                    <p>
-                        The inaugurator has finished replacing the rootfs. This host was kexeced into
-                        its image, which if not hung, means the test itself is running.
-                    </p>
-                    <p><span class="label label-danger"><span class="glyphicon glyphicon-remove"></span> DESTROYED</span></p>
-                    <p>
-                        A temporary stage, on the road for the host to drop out of the cluster. This
-                        happens if 5 slow reclamations failed on this host
-                    </p>
-                    <p><span class="label label-default-dark"><span class="glyphicon glyphicon-off"></span> OFFLINE</span></p>
-                    <p>
-                        The server is off.
-                    </p>
-                    <p><span class="label label-detached"><span class="glyphicon glyphicon-eject"></span> DETACHED</span></p>
-                    <p>
-                        A temporary state which "freezes" the server at the moment it was detached; Rackattack will not shut it off or reclaim it in this state, nor will it be available for allocation. Meant for debugging or one-time-inaugurations.
-                    </p>
-                </div>
-            </div>
         </div>
         <div class="col-md-6 panel-group" id="accordion">
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h3 class="panel-title">
-                        Stats
+                        <a data-toggle="collapse" data-parent="#accordion" href="#collapse0">Stats</a>
                     </h3>
                 </div>
-                <div class="panel-body panel-body-with-list-group">
-                    <ul class="list-group">
-                        <li class="list-group-item"><span class="label label-primary"><span class="glyphicon glyphicon-pause"> </span> Available</span> (checked in) hosts in default pool: <span class="badge badge-primary" data-bind="text: nrHosts('default', 'CHECKED_IN')"></span></li>
-                        <li class="list-group-item"><span class="label label-primary"><span class="glyphicon glyphicon-pause"> </span> Available</span> (checked in) in non-default pools: <span class="badge badge-primary" data-bind="text: nrHosts('', 'CHECKED_IN') - nrHosts('default', 'CHECKED_IN')"></span></li>
-                        <li class="list-group-item"><span class="label label-danger"><span class="glyphicon glyphicon-remove"> </span> Destroyed</span> hosts: <span class="badge badge-danger" data-bind="text: nrHosts('', 'DESTROYED')"></span></li>
-                        <li class="list-group-item"><span class="label label-default-dark"><span class="glyphicon glyphicon-off"> </span> Offline</span> hosts: <span class="badge badge-dark" data-bind="text: nrHosts('', 'OFFLINE')"></span></li>
-                        <li class="list-group-item"><span class="label label-success"><span class="glyphicon glyphicon-ok"> </span> In-use</span> (Inauguration Done) hosts: <span class="badge badge-success" data-bind="text: nrHosts('', 'INAUGURATION_DONE')"></span></li>
-                        <li class="list-group-item"><span class="label label-detached"><span class="glyphicon glyphicon-eject"> </span> Detached</span> hosts: <span class="badge badge-detached" data-bind="text: nrHosts('', 'DETACHED')"></span></li>
-                        <li class="list-group-item">Total Nr. of hosts: <span class="badge badge" data-bind="text: nrHosts('', '')"></span></li>
-                        <li class="list-group-item">Current hosts usage: <span class="badge badge" data-bind="text: (((nrHosts('', 'INAUGURATION_DONE') + nrHosts('', 'DETACHED')) / nrHosts('', '')).toFixed(2) * 100).toString() + '%'"></span></li>
-                    </ul>
+                <div id="collapse0" class="panel-collapse collapse in">
+                    <div class="panel-body panel-body-with-list-group">
+                        <ul class="list-group">
+                            <li class="list-group-item"><span class="label label-primary"><span class="glyphicon glyphicon-pause"> </span> Available</span> (checked in) hosts in default pool: <span class="badge badge-primary" data-bind="text: nrHosts('default', 'CHECKED_IN')"></span></li>
+                            <li class="list-group-item"><span class="label label-primary"><span class="glyphicon glyphicon-pause"> </span> Available</span> (checked in) in non-default pools: <span class="badge badge-primary" data-bind="text: nrHosts('', 'CHECKED_IN') - nrHosts('default', 'CHECKED_IN')"></span></li>
+                            <li class="list-group-item"><span class="label label-danger"><span class="glyphicon glyphicon-remove"> </span> Destroyed</span> hosts: <span class="badge badge-danger" data-bind="text: nrHosts('', 'DESTROYED')"></span></li>
+                            <li class="list-group-item"><span class="label label-default-dark"><span class="glyphicon glyphicon-off"> </span> Offline</span> hosts: <span class="badge badge-dark" data-bind="text: nrHosts('', 'OFFLINE')"></span></li>
+                            <li class="list-group-item"><span class="label label-success"><span class="glyphicon glyphicon-ok"> </span> In-use</span> (Inauguration Done) hosts: <span class="badge badge-success" data-bind="text: nrHosts('', 'INAUGURATION_DONE')"></span></li>
+                            <li class="list-group-item"><span class="label label-detached"><span class="glyphicon glyphicon-eject"> </span> Detached</span> hosts: <span class="badge badge-detached" data-bind="text: nrHosts('', 'DETACHED')"></span></li>
+                            <li class="list-group-item">Total Nr. of hosts: <span class="badge badge" data-bind="text: nrHosts('', '')"></span></li>
+                            <li class="list-group-item">Current hosts usage: <span class="badge badge" data-bind="text: (((nrHosts('', 'INAUGURATION_DONE') + nrHosts('', 'DETACHED')) / nrHosts('', '')).toFixed(2) * 100).toString() + '%'"></span></li>
+                        </ul>
+                    </div>
                 </div>
             </div>
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h3 class="panel-title">
-                        <a data-toggle="collapse" data-parent="#accordion" href="#collapse1">Allocations</a>
+                        <a class="collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapse1">Allocations</a>
                         <span class="badge" data-bind="text: allocations.allocations().length"> </span>
                     </h3>
                 </div>
-                <div id="collapse1" class="panel-collapse collapse in">
+                <div id="collapse1" class="panel-collapse collapse">
                     <div class="panel-body">
                         <table class="table">
                             <thead>
@@ -170,7 +129,7 @@
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h3 class="panel-title">
-                        <a data-toggle="collapse" data-parent="#accordion" href="#collapse2">Pools</a>
+                        <a class="collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapse2">Pools</a>
                         <span class="badge" data-bind="text: pools.pools().length"> </span>
                     </h3>
                 </div>
@@ -212,7 +171,7 @@
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h3 class="panel-title">
-                        <a data-toggle="collapse" data-parent="#accordion" href="#collapse3">Diagnostics</a>
+                        <a class="collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapse3">Diagnostics</a>
                     </h3>
                 </div>
                 <div id="collapse3" class="panel-collapse collapse">
@@ -273,6 +232,53 @@
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        <a class="collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapse4">Legend</a>
+                    </h3>
+                </div>
+                <div id="collapse4" class="panel-collapse collapse">
+                    <div class="panel-body">
+                        <p><span class="label label-info"><span class="glyphicon glyphicon-backward"></span> QUICK_RECLAIMATION_IN_PROGRESS</span></p>
+                        <p>Quick reclaim works using kexecing the inaugurator on the host
+                        <p>
+                        <p><span class="label label-warning"><span class="glyphicon glyphicon-fast-backward"></span> SLOW_RECLAIMATION_IN_PROGRESS</span></p>
+                        <p>
+                            Slow reclaim works by rebooting the server and using PXE to load the inaugurator.
+                            This is slow since a server takes minutes to reboot, plus, more than one reboot
+                            might be required.
+                        </p>
+                        <p><span class="label label-primary"><span class="glyphicon glyphicon-pause"></span> CHECKED_IN</span></p>
+                        <p>
+                            The inaugurator has booted successfully, and is waiting for the command to switch
+                            a rootfs. The current rootfs is being hashed in the background.
+                        </p>
+                        <p><span class="label label-info"><span class="glyphicon glyphicon-play"></span> INAUGURATION_LABEL_PROVIDED</span></p>
+                        <p>
+                            The inaugurator is replacing the rootfs in this host.
+                        </p>
+                        <p><span class="label label-success"><span class="glyphicon glyphicon-ok"></span> INAUGURATION_DONE</span></p>
+                        <p>
+                            The inaugurator has finished replacing the rootfs. This host was kexeced into
+                            its image, which if not hung, means the test itself is running.
+                        </p>
+                        <p><span class="label label-danger"><span class="glyphicon glyphicon-remove"></span> DESTROYED</span></p>
+                        <p>
+                            A temporary stage, on the road for the host to drop out of the cluster. This
+                            happens if 5 slow reclamations failed on this host
+                        </p>
+                        <p><span class="label label-default-dark"><span class="glyphicon glyphicon-off"></span> OFFLINE</span></p>
+                        <p>
+                            The server is off.
+                        </p>
+                        <p><span class="label label-detached"><span class="glyphicon glyphicon-eject"></span> DETACHED</span></p>
+                        <p>
+                            A temporary state which "freezes" the server at the moment it was detached; Rackattack will not shut it off or reclaim it in this state, nor will it be available for allocation. Meant for debugging or one-time-inaugurations.
+                        </p>
                     </div> <!-- panel-body //-->
                 </div> <!-- collapse //-->
             </div> <!-- panel //-->
