@@ -146,3 +146,12 @@ label {
 .panel-heading {
     position: relative;
 }
+.panel-body-with-list-group {
+    padding: 0;
+}
+.panel-body-with-list-group .list-group .list-group-item {
+    border-top: 0;
+    border-right: 0;
+    border-left: 0;
+    margin-bottom: 0;
+}
