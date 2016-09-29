@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block head %}
+
+<script>
+</script>
+
+{% block head_more %}
+<script src="https://unpkg.com/react@15.3.2/dist/react.js"></script>
+<script src="https://unpkg.com/react-dom@15.3.2/dist/react-dom.js"></script>
+<script src="https://unpkg.com/babel-core@5.8.38/browser.min.js"></script>
+<script src="https://unpkg.com/jquery@3.1.0/dist/jquery.min.js"></script>
+<script src="https://unpkg.com/remarkable@1.6.2/dist/remarkable.min.js"></script>
+<script type="text/javascript" src="/realtimewebui/js/realtimewebui.js"></script>
+<script type="text/javascript" src="/realtimewebui/externals/underscore-min.js"></script>
+<script>
+var globalModelWebsocketPort = {{globalModelWebsocketPort}};
+var globalModelWebsocketSecret = "{{globalModelWebsocketSecret}}";
+</script>
+{% endblock %}
+
+<main id="content"></main>
+
+<script type="text/babel">
+var nrHostsPerRow = 2;
+
+var Dashboard = React.createClass({
+  changeState: function(state) {
+    this.setState({hosts: state["hosts"]});
+  },
+  componentDidMount: function() {
+    var ui = new RealTimeWebUI();
+    var dashboardSource = "status_" +  "Bezeq";
+    ui.register(dashboardSource, this.changeState);
+  },
+  getInitialState: function() {
+    return this.props.data;
+  },
+  render: function() {
+    return (
+      <RackList hosts={this.state.hosts} />
+    );
+  }
+});
+
+var RackList = React.createClass({
+  getRacksToHosts: function(hosts) {
+    return _.groupBy(hosts, function(host) {
+      var rackNumber = parseInt(host.id.replace("rack", "").replace("-server\d", ""));
+      return rackNumber;
+    });
+  },
+
+  getNrSlotsInASingleRack: function(racksToHosts) {
+    var nrHostsPerRack = _.map(_.values(racksToHosts), function(hosts) {
+      return hosts.length;
+    });
+    return _.max(nrHostsPerRack);
+  },
+
+  getOrderedRacks: function(hosts) {
+    var racksToHosts = this.getRacksToHosts(hosts);
+    var racksNumbers = Object.keys(racksToHosts);
+    var orderedRacksIDs = _.sortBy(racksNumbers, function(number) {
+        return number;
+    });
+    var nrSlots = this.getNrSlotsInASingleRack(racksToHosts);
+    return _.map(orderedRacksIDs, function(rackID) {
+        return (
+            <Rack id={rackID} key={rackID} hosts={racksToHosts[rackID]} nrSlots={nrSlots} />
+        );
+    });
+  },
+
+  render: function() {
+	var racks = this.getOrderedRacks(this.props.hosts);
+    return (
+      <div className="rackList">yo these are the racks man:
+        {racks}
+      </div>
+    );
+  }
+});
+
+var Rack = React.createClass({
+  getRackRows: function(hosts) {
+    hosts = _.sortBy(hosts, function(host) {
+        return host.id;
+    });
+    var rows = [];
+	var idxOfFirstHostInRow = 0;
+    while (idxOfFirstHostInRow < this.props.nrSlots) {
+		var row = hosts.slice(idxOfFirstHostInRow, idxOfFirstHostInRow + nrHostsPerRow + 1);
+        rows.push(row);
+        idxOfFirstHostInRow += nrHostsPerRow;
+    }
+    return rows;
+  },
+  render: function() {
+    var rackRows = this.getRackRows(this.props.hosts);
+    console.log(rackRows.length);
+    return (
+      <div className="rack">
+        <h2>
+          Rack ID: {this.props.id}
+        </h2>
+        return _.map(rackRows, function(row) {
+          <RackRow key={row[0].id} />
+        });
+      </div>
+    );
+  }
+});
+
+var RackRow = React.createClass({
+  render: function() {
+    return (
+      <div className="rackRow">
+what a cool row
+      </div>
+    );
+  }
+});
+
+var initialState = {hosts: [], allocations: []}
+ReactDOM.render(
+  <Dashboard data={initialState} />,
+  document.getElementById('content')
+);
+</script>
+
+{% endblock %}
