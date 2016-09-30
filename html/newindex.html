@@ -12,7 +12,6 @@
 <script src="https://unpkg.com/react@15.3.2/dist/react.js"></script>
 <script src="https://unpkg.com/react-dom@15.3.2/dist/react-dom.js"></script>
 <script src="https://unpkg.com/babel-core@5.8.38/browser.min.js"></script>
-<script src="https://unpkg.com/jquery@3.1.0/dist/jquery.min.js"></script>
 <script src="https://unpkg.com/remarkable@1.6.2/dist/remarkable.min.js"></script>
 <script type="text/javascript" src="/realtimewebui/js/realtimewebui.js"></script>
 <script type="text/javascript" src="/realtimewebui/externals/underscore-min.js"></script>
@@ -158,12 +157,48 @@ var stateMap = {
     "OFFLINE":{ iconClass: "glyphicon-off", labelClass: "label-default-dark" },
     "DETACHED":{ iconClass: "glyphicon-eject", labelClass: "label-detached" }
 };
+var NAT_ADDR = "rackattack-nat.dc1";
+
 var Host = React.createClass({
+  getNatPortFromInnerIPAddress: function(ipAddress) {
+        return 2000 + parseInt(ipAddress.split(".")[3]) + (parseInt(ipAddress.split(".")[2]) - 1) * 256;
+  },
+  generatePopoverContent: function() {
+    var content = "Inner: " + this.props.data.ipAddress;
+    content += "<br />Outer: " + NAT_ADDR + ":" + this.getNatPortFromInnerIPAddress(this.props.data.ipAddress);
+    if (this.props.data.nodeName) {
+        content += "<br />Node: " + this.props.data.nodeName;
+    }
+    content += "<br />Pool: " + this.props.data.pool;
+    if (this.props.data.warnings) {
+        content += "<br /><span class='text-danger'>Warnings:<ul>";
+        for (idx in this.props.data.warnings) {
+            warning = this.props.data.warnings[idx];
+            content += "<li>" + warning + "</li>";
+        }
+        content += "</ul></span>";
+    }
+    if (this.props.data.reasonForDestruction) {
+        content += "<div class='text-danger'>Reason for destruction: " + this.props.data.reasonForDestruction + "</span>";
+    }
+    return content;
+  },
+  componentDidMount: function() {
+    var content = this.generatePopoverContent();
+    $("#node-" + this.props.data.id).popover({
+      title: this.props.data.id,
+      container: "body",
+      content: content,
+      trigger: "hover",
+      placement: "auto",
+      html: true
+    });
+  },
   render: function() {
     var labelClassNames = "label machine-label " + stateMap[this.props.data.state]["labelClass"];
     var iconClassNames = "glyphicon " + stateMap[this.props.data.state]["iconClass"];
     return (
-      <td className="host machine">
+      <td className="host machine" id={"node-"+this.props.data.id}>
         <span className={labelClassNames}>
           <span className={iconClassNames}></span>
             {pad(this.props.hostIdx)}
