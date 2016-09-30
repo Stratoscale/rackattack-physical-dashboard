@@ -6,6 +6,9 @@
 </script>
 
 {% block head_more %}
+<link href="/static/style.css" rel="stylesheet">
+<link href="/static/darktheme.css" rel="stylesheet" id="dark">
+<link href="/static/lighttheme.css" rel="stylesheet" id="light">
 <script src="https://unpkg.com/react@15.3.2/dist/react.js"></script>
 <script src="https://unpkg.com/react-dom@15.3.2/dist/react-dom.js"></script>
 <script src="https://unpkg.com/babel-core@5.8.38/browser.min.js"></script>
@@ -19,10 +22,27 @@ var globalModelWebsocketSecret = "{{globalModelWebsocketSecret}}";
 </script>
 {% endblock %}
 
-<main id="content"></main>
+<main class="container" id="content">
+    <div class="top-row">
+        <div class=="col-md-12">
+            {% for dashboardSource in dashboardSources %}
+            <button type="button" data-bind="click: function() { model.loadDashboard('{{ dashboardSource.name }}') }, css: classOfDashboardButton('{{ dashboardSource.name }}')">{{ dashboardSource.name }}</button>
+            {% endfor %}
+        </div>
+    </div>
+    <div id="dashboardInfo">
+    </div>
+</main>
 
 <script type="text/babel">
 var nrHostsPerRow = 2;
+
+function pad(str) {
+    str = str.toString();
+    var pad = "00"
+    var ans = pad.substring(0, pad.length - str.length) + str
+    return ans;
+}
 
 var Dashboard = React.createClass({
   changeState: function(state) {
@@ -75,7 +95,7 @@ var RackList = React.createClass({
   render: function() {
 	var racks = this.getOrderedRacks(this.props.hosts);
     return (
-      <div className="rackList">yo these are the racks man:
+      <div className="rackList">
         {racks}
       </div>
     );
@@ -84,29 +104,35 @@ var RackList = React.createClass({
 
 var Rack = React.createClass({
   getRackRows: function(hosts) {
-    hosts = _.sortBy(hosts, function(host) {
-        return host.id;
+    hosts = _.indexBy(hosts, "id");
+    var nrRows = Math.ceil(this.props.nrSlots / nrHostsPerRow);
+    var rackID = "rack" + pad(this.props.id);
+    var rows = _.map(_.range(nrRows), function(rowNumber) {
+        var idxOfFirstHostInRow = 1 + rowNumber * nrHostsPerRow;
+        var rowHostsIndices = _.range(idxOfFirstHostInRow, idxOfFirstHostInRow + nrHostsPerRow);
+        var rowHosts = _.map(rowHostsIndices, function(hostIdx) {
+            var hostID = rackID + "-server" + pad(hostIdx);
+            if (hostID in hosts) {
+                return <Host data={hosts[hostID]} key={hostID} hostIdx={hostIdx} />
+            }
+            return <EmptyHostSlot hostID={hostID} key={hostID} hostIdx={hostIdx} />
+        });
+        return <RackRow key={idxOfFirstHostInRow} hosts={rowHosts} />
     });
-    var rows = [];
-	var idxOfFirstHostInRow = 0;
-    while (idxOfFirstHostInRow < this.props.nrSlots) {
-		var row = hosts.slice(idxOfFirstHostInRow, idxOfFirstHostInRow + nrHostsPerRow + 1);
-        rows.push(row);
-        idxOfFirstHostInRow += nrHostsPerRow;
-    }
     return rows;
   },
   render: function() {
     var rackRows = this.getRackRows(this.props.hosts);
-    console.log(rackRows.length);
     return (
-      <div className="rack">
+      <div className="rack col-md-4">
         <h2>
-          Rack ID: {this.props.id}
+          Rack {this.props.id}
         </h2>
-        return _.map(rackRows, function(row) {
-          <RackRow key={row[0].id} />
-        });
+        <table className="rack-table">
+          <tbody>
+            {rackRows}
+          </tbody>
+        </table>
       </div>
     );
   }
@@ -115,9 +141,50 @@ var Rack = React.createClass({
 var RackRow = React.createClass({
   render: function() {
     return (
-      <div className="rackRow">
-what a cool row
-      </div>
+      <tr className="rackRow">
+       {this.props.hosts}
+      </tr>
+    );
+  }
+});
+
+var stateMap = {
+    "QUICK_RECLAIMATION_IN_PROGRESS":{ iconClass: "glyphicon-backward", labelClass: "label-info" },
+    "SLOW_RECLAIMATION_IN_PROGRESS":{ iconClass: "glyphicon-fast-backward", labelClass: "label-warning" },
+    "CHECKED_IN":{ iconClass: "glyphicon-pause", labelClass: "label-primary" },
+    "INAUGURATION_LABEL_PROVIDED":{ iconClass: "glyphicon-play", labelClass: "label-info" },
+    "INAUGURATION_DONE":{ iconClass: "glyphicon-ok", labelClass: "label-success" },
+    "DESTROYED":{ iconClass: "glyphicon-remove", labelClass: "label-danger" },
+    "OFFLINE":{ iconClass: "glyphicon-off", labelClass: "label-default-dark" },
+    "DETACHED":{ iconClass: "glyphicon-eject", labelClass: "label-detached" }
+};
+var Host = React.createClass({
+  render: function() {
+    var labelClassNames = "label machine-label " + stateMap[this.props.data.state]["labelClass"];
+    var iconClassNames = "glyphicon " + stateMap[this.props.data.state]["iconClass"];
+    return (
+      <td className="host machine">
+        <span className={labelClassNames}>
+          <span className={iconClassNames}></span>
+            {pad(this.props.hostIdx)}
+           <span className="warningSignWrapper">
+              <span className="glyphicon glyphicon-warning-sign">2</span>
+           </span>
+        </span>
+      </td>
+    );
+  }
+});
+
+var EmptyHostSlot = React.createClass({
+  render: function() {
+    return (
+      <td className="host machine">
+        <span className="label-default-light label machine-label">
+          <span className="glyphicon glyphicon-ban-circle"></span>
+          {pad(this.props.hostIdx)}
+        </span>
+      </td>
     );
   }
 });
@@ -125,7 +192,7 @@ what a cool row
 var initialState = {hosts: [], allocations: []}
 ReactDOM.render(
   <Dashboard data={initialState} />,
-  document.getElementById('content')
+  document.getElementById('dashboardInfo')
 );
 </script>
 

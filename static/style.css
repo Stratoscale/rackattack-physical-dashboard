@@ -159,3 +159,7 @@ label {
     border-left: 0;
     margin-bottom: 0;
 }
+.warningSignWrapper {
+    position:absolute;
+    right: 5px;
+}
