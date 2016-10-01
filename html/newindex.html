@@ -32,6 +32,7 @@ var rackattackInstances = [
 var activeDashboardName = "";
 var activeDashboardHost = "";
 var ui = new RealTimeWebUI();
+var lotsOfColors = ["#ab47bc", "#5c6bc0", "#8d6e63", "#f44336", "#e91e63", "#9c27b0", "#3f51b5", "#2196f3", "#00bcd4", "#009688", "#4caf50", "#cddc39", "#ff9800", "#795548", "#e53935", "#d81b60", "#8e24aa", "#3949ab", "#1e88e5", "#00acc1", "#00897b", "#43a047", "#fb8c00", "#6d4c41", "#d32f2f", "#c2185b", "#7b1fa2", "#303f9f", "#1976d2", "#0097a7", "#00796b", "#388e3c", "#afb42b", "#f57c00", "#5d4037", "#c62828", "#ad1457", "#6a1b9a", "#283593", "#1565c0", "#00838f", "#00695c", "#2e7d32", "#9e9d24", "#ef6c00", "#4e342e", "#b71c1c", "#880e4f", "#4a148c", "#1a237e", "#0d47a1", "#006064", "#004d40", "#1b5e20", "#827717", "#e65100", "#3e2723", 'AliceBlue', 'AntiqueWhite', 'Aqua', 'Aquamarine', 'Azure', 'Beige', 'Bisque', 'Black', 'BlanchedAlmond', 'Blue', 'BlueViolet', 'Brown', 'BurlyWood', 'CadetBlue', 'Chartreuse', 'Chocolate', 'Coral', 'CornflowerBlue', 'Cornsilk', 'Crimson', 'Cyan', 'DarkBlue', 'DarkCyan', 'DarkGoldenRod', 'DarkGray', 'DarkGreen', 'DarkKhaki', 'DarkMagenta', 'DarkOliveGreen', 'DarkOrange', 'DarkOrchid', 'DarkRed', 'DarkSalmon', 'DarkSeaGreen', 'DarkSlateBlue', 'DarkSlateGray', 'DarkTurquoise', 'DarkViolet', 'DeepPink', 'DeepSkyBlue', 'DimGray', 'DodgerBlue', 'FireBrick', 'FloralWhite', 'ForestGreen', 'Fuchsia', 'Gainsboro', 'GhostWhite', 'Gold', 'GoldenRod', 'Gray', 'Green', 'GreenYellow', 'HoneyDew', 'HotPink', 'IndianRed', 'Indigo', 'Ivory', 'Khaki', 'Lavender', 'LavenderBlush', 'LawnGreen', 'LemonChiffon', 'LightBlue', 'LightCoral', 'LightCyan', 'LightGoldenRodYellow', 'LightGray', 'LightGreen', 'LightPink', 'LightSalmon', 'LightSeaGreen', 'LightSkyBlue', 'LightSlateGray', 'LightSteelBlue', 'LightYellow', 'Lime', 'LimeGreen', 'Linen', 'Magenta', 'Maroon', 'MediumAquaMarine', 'MediumBlue', 'MediumOrchid', 'MediumPurple', 'MediumSeaGreen', 'MediumSlateBlue', 'MediumSpringGreen', 'MediumTurquoise', 'MediumVioletRed', 'MidnightBlue', 'MintCream', 'MistyRose', 'Moccasin', 'NavajoWhite', 'Navy', 'OldLace', 'Olive', 'OliveDrab', 'Orange', 'OrangeRed', 'Orchid', 'PaleGoldenRod', 'PaleGreen', 'PaleTurquoise', 'PaleVioletRed', 'PapayaWhip', 'PeachPuff', 'Peru', 'Pink', 'Plum', 'PowderBlue', 'Purple', 'RebeccaPurple', 'Red', 'RosyBrown', 'RoyalBlue', 'SaddleBrown', 'Salmon', 'SandyBrown', 'SeaGreen', 'SeaShell', 'Sienna', 'Silver', 'SkyBlue', 'SlateBlue', 'SlateGray', 'Snow', 'SpringGreen', 'SteelBlue', 'Tan', 'Teal', 'Thistle', 'Tomato', 'Turquoise', 'Violet', 'Wheat', 'White', 'WhiteSmoke', 'Yellow', 'YellowGreen']
 
 function pad(str) {
     str = str.toString();
@@ -219,7 +220,7 @@ var Stats = React.createClass({
                   </span>
                   Available
                 </span>
-                 (checked in) hosts in default pool:
+                &nbsp;(checked in) hosts in default pool:
                 <span className="badge badge-primary">
                   {this.nrHosts('default', 'CHECKED_IN')}
                 </span>
@@ -230,7 +231,7 @@ var Stats = React.createClass({
                   </span>
                   Available
                 </span>
-                 (checked in) in non-default pools:
+                &nbsp;(checked in) in non-default pools:
                 <span className="badge badge-primary">
                   {this.nrHosts('', 'CHECKED_IN') - this.nrHosts('default', 'CHECKED_IN')}
                 </span>
@@ -241,7 +242,7 @@ var Stats = React.createClass({
                   </span>
                   Destroyed
                 </span>
-                 hosts:
+                &nbsp;hosts:
                 <span className="badge badge-danger">
                   {this.nrHosts('', 'DESTROYED')}
                 </span>
@@ -252,7 +253,7 @@ var Stats = React.createClass({
                   </span>
                   Offline
                 </span>
-                 hosts:
+                &nbsp;hosts:
                 <span className="badge badge-dark">
                   {this.nrHosts('', 'OFFLINE')}
                 </span>
@@ -263,7 +264,7 @@ var Stats = React.createClass({
                   </span>
                   In-use
                 </span>
-                 (Inauguration Done) hosts:
+                &nbsp;(Inauguration Done) hosts:
                 <span className="badge badge-success">
                   {this.nrHosts('', 'INAUGURATION_DONE')}
                 </span>
@@ -274,7 +275,7 @@ var Stats = React.createClass({
                   </span>
                   Detached
                 </span>
-                hosts:
+               &nbsp;hosts:
                 <span className="badge badge-detached">
                   {this.nrHosts('', 'DETACHED')}
                 </span>
@@ -363,6 +364,14 @@ var StatesLegend = React.createClass({
   }
 });
 
+function objectSize(obj) {
+    var size = 0, key;
+    for (key in obj) {
+        if (obj.hasOwnProperty(key)) size++;
+    }
+    return size;
+};
+
 var AllocationRow = React.createClass({
   componentWillMount: function() {
     this.areHostsVisible = false;
@@ -373,6 +382,20 @@ var AllocationRow = React.createClass({
     if (this.areHostsVisible) {
       tableRowClasses += " hover";
     }
+    var style = {backgroundColor: lotsOfColors[this.props.rowIdx]};
+    var state;
+    var stateClass;
+    if (this.props.allocation.dead) {
+	  state = "DEAD";
+      stateClass = "label-danger";
+    } else if (this.props.allocation.done) {
+      state = "DONE";
+      stateClass = "label-success";
+    } else {
+      state = "WAIT";
+      stateClass = "label-primary";
+    }
+    stateClass = "label " + stateClass;
     return (
           <tr className={tableRowClasses}
               onMouseOver={() => this.showAllocationHosts() }
@@ -380,11 +403,13 @@ var AllocationRow = React.createClass({
             <td>
               <div className="media">
                 <a className="media-left pull-left" href="#">
-                  <div className="color-swatch">3</div>
+                  <div style={style} className="color-swatch">
+                    {objectSize(this.props.allocation.allocated)}
+                  </div>
                 </a>
                 <div className="media-body">
                   <div className="media-heading">
-                    {this.props.allocation.allocationInfo.user}
+                    {this.props.allocation.allocationInfo.user} {this.props.rowIdx}
                   </div>
                   <AllocationExtendedData
                    hosts={this.props.hosts}
@@ -396,7 +421,7 @@ var AllocationRow = React.createClass({
             </td>
             <td className="state-column">
               <div>
-                <span className="label label-danger">WAIT</span>
+                <span className={stateClass}>{state}</span>
               </div>
             </td>
             <td>
@@ -471,8 +496,8 @@ var Allocations = React.createClass({
           </tr>
         </thead>
         <tbody>
-          {this.props.allocations.map(function(allocation) {
-            return <AllocationRow key={allocation.index} allocation={allocation} hosts={hosts} /> ;
+          {this.props.allocations.map(function(allocation, index) {
+            return <AllocationRow rowIdx={index} key={allocation.index} allocation={allocation} hosts={hosts} /> ;
           })}
         </tbody>
       </table>
@@ -483,12 +508,15 @@ var Allocations = React.createClass({
 var AllocationHost = React.createClass({
   render: function() {
     var host = this.props.hosts[this.props.hostIdx];
+    var hostIconClasses = "host-icon " + stateMap[host.state]["labelClass"].replace('label', 'text');
+    var innerHostIconClasses = "glyphicon " + stateMap[host.state]["iconClass"];
     return (
         <li className="list-group-item">
-          <span className="host-icon">
-            <span className="glyphicon">
+          <span className={hostIconClasses}>
+            <span className={innerHostIconClasses}>
             </span>
           </span>
+          &nbsp;
           <span className="test-name">
             {this.props.nodeName}
           </span> (
