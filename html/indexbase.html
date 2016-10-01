@@ -82,7 +82,7 @@
                                 </tr>
                             </thead>
                             <tbody data-bind="foreach: { data: allocations.allocations }">
-                                <tr data-bind="attr: { allocationIndex: index }, event: { mouseenter: mouseOver, mouseleave: mouseOut }" class="allocation-row">
+                                <tr data-bind="attr: { allocationIndex: index }, event: { mouseenter: mouseOver, mouseleave: mouseOut }" class="host-collection-row">
                                     <td>
                                         <div class="media">
                                             <a class="media-left pull-left" href="#">
@@ -137,7 +137,7 @@
                     <div class="panel-body">
                         <table class="table">
                             <tbody data-bind="foreach: { data: pools.pools() }">
-                                <tr data-bind="event: { mouseenter: mouseOver, mouseleave: mouseOut }" class="allocation-row">
+                                <tr data-bind="event: { mouseenter: mouseOver, mouseleave: mouseOut }" class="host-collection-row">
                                     <td>
                                         <div class="media">
                                             <a class="media-left pull-left" href="#">
@@ -609,7 +609,7 @@ function Allocation(allocationStatus, color) {
         if (self.dead())
             return;
 
-        $(event.target).parents("tr.allocation-row").addClass("hover");
+        $(event.target).parents("tr.host-collection-row").addClass("hover");
         hostsIndices = _.values(self.allocated);
         makeHostsBlink(hostsIndices);
     };
@@ -707,7 +707,7 @@ function Pool(poolName, hosts, color)
     self.color = color;
 
     self.mouseOver = function(pool, event) {
-        $(event.target).parents("tr.allocation-row").addClass("hover");
+        $(event.target).parents("tr.host-collection-row").addClass("hover");
         hostsIndices = _.pluck(self.hosts, "index");
         makeHostsBlink(hostsIndices)
     };

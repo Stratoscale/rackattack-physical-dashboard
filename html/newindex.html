@@ -378,7 +378,7 @@ var AllocationRow = React.createClass({
   },
 
   render: function() {
-    var tableRowClasses = "allocation-row";
+    var tableRowClasses = "host-collection-row";
     if (this.areHostsVisible) {
       tableRowClasses += " hover";
     }
@@ -398,8 +398,8 @@ var AllocationRow = React.createClass({
     stateClass = "label " + stateClass;
     return (
           <tr className={tableRowClasses}
-              onMouseOver={() => this.showAllocationHosts() }
-              onMouseOut={() => this.hideAllocationHosts() }>
+              onMouseOver={() => this.showHostsInCollection() }
+              onMouseOut={() => this.hideHostsInCollection() }>
             <td>
               <div className="media">
                 <a className="media-left pull-left" href="#">
@@ -458,12 +458,12 @@ var AllocationRow = React.createClass({
     return result;
   },
 
-  showAllocationHosts: function() {
+  showHostsInCollection: function() {
     this.areHostsVisible = true;
     this.forceUpdate();
   },
 
-  hideAllocationHosts: function() {
+  hideHostsInCollection: function() {
     this.areHostsVisible = false;
     this.forceUpdate();
   }
@@ -471,13 +471,12 @@ var AllocationRow = React.createClass({
 
 var AllocationExtendedData = React.createClass({
   render: function() {
-    var hosts = this.props.hosts;
     return (
       <div className="hosts-list">
         <small>Nice: {this.props.allocationInfo.nice}, Purpose: {this.props.allocationInfo.purpose}</small>
-        <AllocationHosts
-         hosts={this.props.hosts}
-         allocationHosts={this.props.allocatedHosts} />
+        <AllocatedHostsCollection
+         allHosts={this.props.hosts}
+         hosts={this.props.allocatedHosts} />
       </div>
     );
   }
@@ -497,7 +496,11 @@ var Allocations = React.createClass({
         </thead>
         <tbody>
           {this.props.allocations.map(function(allocation, index) {
-            return <AllocationRow rowIdx={index} key={allocation.index} allocation={allocation} hosts={hosts} /> ;
+            return <AllocationRow
+                    rowIdx={index}
+                    key={allocation.index}
+                    allocation={allocation}
+                    hosts={hosts} /> ;
           })}
         </tbody>
       </table>
@@ -505,9 +508,17 @@ var Allocations = React.createClass({
   }
 });
 
-var AllocationHost = React.createClass({
+var HostRow = React.createClass({
   render: function() {
-    var host = this.props.hosts[this.props.hostIdx];
+	var host;
+    var text;
+    if (this.props.nodeName) {
+      host = this.props.allHosts[this.props.hostIdx];
+      text = this.props.nodeName + "(" + host.id + ")";
+    } else {
+      host = this.props.host;
+      text = host.id
+    }
     var hostIconClasses = "host-icon " + stateMap[host.state]["labelClass"].replace('label', 'text');
     var innerHostIconClasses = "glyphicon " + stateMap[host.state]["iconClass"];
     return (
@@ -517,12 +528,8 @@ var AllocationHost = React.createClass({
             </span>
           </span>
           &nbsp;
-          <span className="test-name">
-            {this.props.nodeName}
-          </span> (
-          <span>
-            {host.id}
-          </span>)
+          {this.props.nodeName}
+          ({host.id})
           <div className="pull-right copy-command">
             <span className="glyphicon glyphicon-circle-arrow-right connect-link" >
             </span>
@@ -534,12 +541,17 @@ var AllocationHost = React.createClass({
     );
   }
 });
-var AllocationHosts = React.createClass({
+
+var AllocatedHostsCollection = React.createClass({
   render: function() {
     var hosts = [];
-    for (var nodeName in this.props.allocationHosts) {
-        var hostIdx = this.props.allocationHosts[nodeName];
-        var host = <AllocationHost key={hostIdx} hostIdx={hostIdx} nodeName={nodeName} hosts={this.props.hosts}/>
+    for (var nodeName in this.props.hosts) {
+        var hostIdx = this.props.hosts[nodeName];
+        var host = <HostRow
+                    key={hostIdx}
+                    hostIdx={hostIdx}
+                    nodeName={nodeName}
+                    allHosts={this.props.allHosts} />
         hosts.push(host);
     }
     return (
@@ -550,10 +562,73 @@ var AllocationHosts = React.createClass({
   }
 });
 
+var Pool = React.createClass({
+  render: function() {
+    var hosts = this.props.hosts;
+    var style = {backgroundColor: lotsOfColors[this.props.idx]};
+    var tableRowClasses = "host-collection-row";
+    if (this.areHostsVisible) {
+      tableRowClasses += " hover";
+    }
+    return (
+      <tr className={tableRowClasses}
+          onMouseOver={() => this.showHostsInCollection() }
+          onMouseOut={() => this.hideHostsInCollection() }>
+        <td>
+            <div className="media">
+                <a className="media-left pull-left" href="#">
+                    <div className="color-swatch" style={style}>
+                      {hosts.length}
+                    </div>
+                </a>
+                <div className="media-body">
+                    <div className="media-heading">
+                      {this.props.name}
+                    </div>
+                    <ul className="hosts-list list-group">
+                      {hosts.map(function(host) {
+                         return (
+						   <HostRow
+							key={host.id}
+                            host={host}
+							allHosts={hosts} />
+                         );
+                       })}
+                    </ul>
+                </div>
+            </div>
+        </td>
+      </tr>
+    );
+  },
+
+  showHostsInCollection: function() {
+    this.areHostsVisible = true;
+    this.forceUpdate();
+  },
+
+  hideHostsInCollection: function() {
+    this.areHostsVisible = false;
+    this.forceUpdate();
+  }
+});
+
 var Pools = React.createClass({
   render: function() {
+    var hosts = this.props.hosts;
+    var hostsByPools = _.groupBy(hosts, function(host) { return host.pool; });
+    var poolNames = _.uniq(_.keys(hostsByPools));
+
     return (
-        <div>ad</div>
+      <table className="table">
+        <tbody>
+          {_.map(poolNames, function(pool, idx) {
+            return (
+		      <Pool key={pool} name={pool} allHosts={hosts} hosts={hostsByPools[pool]} idx={idx} />
+            );
+           })}
+        </tbody>
+      </table>
     );
   }
 });

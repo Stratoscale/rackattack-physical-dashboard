@@ -70,11 +70,11 @@ tr.hover .hosts-list {
 .badge {
     vertical-align: middle;
 }
-.table > tbody > tr.allocation-row > td{
+.table > tbody > tr.host-collection-row > td{
     padding: 2px 4px;
     vertical-align: middle;
 }
-.allocation-row .label {
+.host-collection-row .label {
     display: block;
 }
 .label-default-light {
@@ -124,10 +124,10 @@ label {
     background-color: #2f4f4f;
 }
 
-.allocation-row .host-icon {
+.host-collection-row .host-icon {
     display: inline;
 }
-.allocation-row .host-icon .glyphicon {
+.host-collection-row .host-icon .glyphicon {
     font-size: 10px;
 }
 nav {
