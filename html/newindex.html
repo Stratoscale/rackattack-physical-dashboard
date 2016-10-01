@@ -42,19 +42,73 @@ function pad(str) {
 }
 
 var DashboardContent = React.createClass({
+  getInitialState: function() {
+    return {viewMode: "state"};
+  },
+
   render: function() {
     return (
       <div className="row">
         <section className="col-md-6">
-          <RackList hosts={this.props.hosts} />
+          <ViewModeSelection setViewModeCallback={this.setViewMode} />
+          <RackList hosts={this.props.hosts} viewMode={this.state.viewMode} />
         </section>
         <aside className="col-md-6">
-            <DashboardPanelGroup allocations={this.props.allocations} hosts={this.props.hosts} />
+            <DashboardPanelGroup
+             allocations={this.props.allocations}
+             hosts={this.props.hosts} />
         </aside>
       </div>
     );
   },
+  
+  setViewMode: function(viewMode) {
+    this.state.viewMode = viewMode;
+    this.forceUpdate();
+  }
+});
 
+var ViewModeOption = React.createClass({
+  render: function() {
+    var checked = "";
+    if (this.props.viewMode == this.props.activeViewMode) {
+      checked = "checked";
+    }
+    return (
+      <div className="radio-inline">
+        <label>
+          <input name="hostViewOptions"
+                 onChange={() => this.props.setViewModeCallback(this.props.viewMode)}
+                 type="radio"
+                 value="{this.props.viewMode}"
+                 checked={checked} ></input>
+          Show {this.props.viewMode}
+        </label>
+      </div>
+    );
+  },
+});
+
+var ViewModeSelection = React.createClass({
+  getInitialState: function() {
+    return {activeViewMode: "state"};
+  },
+
+  render: function() {
+    return (
+      <div>
+        <ViewModeOption setViewModeCallback={this.setViewMode} activeViewMode={this.state.activeViewMode} viewMode="state" />
+        <ViewModeOption setViewModeCallback={this.setViewMode} activeViewMode={this.state.activeViewMode} viewMode="allocation" />
+        <ViewModeOption setViewModeCallback={this.setViewMode} activeViewMode={this.state.activeViewMode} viewMode="pool" />
+      </div>
+    );
+  },
+  
+  setViewMode: function(viewMode) {
+    this.state.activeViewMode = viewMode;
+    this.forceUpdate();
+    this.props.setViewModeCallback(viewMode);
+  }
 });
 
 var RackList = React.createClass({
@@ -79,9 +133,14 @@ var RackList = React.createClass({
         return number;
     });
     var nrSlots = this.getNrSlotsInASingleRack(racksToHosts);
+    var viewMode = this.props.viewMode;
     return _.map(orderedRacksIDs, function(rackID) {
         return (
-            <Rack id={rackID} key={rackID} hosts={racksToHosts[rackID]} nrSlots={nrSlots} />
+            <Rack id={rackID}
+             key={rackID}
+             hosts={racksToHosts[rackID]}
+             nrSlots={nrSlots}
+             viewMode={viewMode} />
         );
     });
   },
@@ -101,13 +160,17 @@ var Rack = React.createClass({
     hosts = _.indexBy(hosts, "id");
     var nrRows = Math.ceil(this.props.nrSlots / nrHostsPerRow);
     var rackID = "rack" + pad(this.props.id);
+    var viewMode = this.props.viewMode;
     var rows = _.map(_.range(nrRows), function(rowNumber) {
         var idxOfFirstHostInRow = 1 + rowNumber * nrHostsPerRow;
         var rowHostsIndices = _.range(idxOfFirstHostInRow, idxOfFirstHostInRow + nrHostsPerRow);
         var rowHosts = _.map(rowHostsIndices, function(hostIdx) {
             var hostID = rackID + "-server" + pad(hostIdx);
             if (hostID in hosts) {
-                return <Host data={hosts[hostID]} key={hostID} hostIdx={hostIdx} />
+                return <Host data={hosts[hostID]}
+                        key={hostID}
+                        hostIdx={hostIdx} 
+                        viewMode={viewMode} />
             }
             return <EmptyHostSlot hostID={hostID} key={hostID} hostIdx={hostIdx} />
         });
@@ -190,7 +253,15 @@ var Host = React.createClass({
     });
   },
   render: function() {
-    var labelClassNames = "label machine-label " + stateMap[this.props.data.state]["labelClass"];
+    var labelClassNames = "label machine-label";
+    var outerSpanStyle = {};
+    if (this.props.viewMode == "state") {
+      labelClassNames += " " + stateMap[this.props.data.state]["labelClass"];
+    } else if (this.props.viewMode == "allocation") {
+      outerSpanStyle["backgroundColor"] = "red";
+    } else if (this.props.viewMode == "pool") {
+      outerSpanStyle["backgroundColor"] = "blue";
+    }
     var iconClassNames = "glyphicon " + stateMap[this.props.data.state]["iconClass"];
     var warningSign = "";
     if (this.props.data.warnings) {
@@ -200,7 +271,7 @@ var Host = React.createClass({
     }
     return (
       <td className="host machine" id={"node-"+this.props.data.id}>
-        <span className={labelClassNames}>
+        <span className={labelClassNames} style={outerSpanStyle} >
           <span className={iconClassNames}></span>
             {pad(this.props.hostIdx)}
             {warningSign}
