@@ -162,4 +162,5 @@ label {
 .warningSignWrapper {
     position:absolute;
     right: 5px;
+    color: yellow;
 }

@@ -124,7 +124,7 @@ class PollThread(threading.Thread):
         try:
             while True:
                 status = client.call('admin__queryStatus')
-                if self._host in ("127.0.0.1", "localhost"):
+                if True or self._host in ("127.0.0.1", "localhost"):
                     self._applyWarnings(status)
                 self._publish(status)
                 time.sleep(self._INTERVAL)

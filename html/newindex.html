@@ -172,11 +172,13 @@ var Host = React.createClass({
     content += "<br />Pool: " + this.props.data.pool;
     if (this.props.data.warnings) {
         content += "<br /><span class='text-danger'>Warnings:<ul>";
-        for (idx in this.props.data.warnings) {
-            warning = this.props.data.warnings[idx];
+        for (var idx in this.props.data.warnings) {
+            var warning = this.props.data.warnings[idx];
             content += "<li>" + warning + "</li>";
         }
         content += "</ul></span>";
+    } else {
+        console.log('no warning!');
     }
     if (this.props.data.reasonForDestruction) {
         content += "<div class='text-danger'>Reason for destruction: " + this.props.data.reasonForDestruction + "</span>";
@@ -197,14 +199,18 @@ var Host = React.createClass({
   render: function() {
     var labelClassNames = "label machine-label " + stateMap[this.props.data.state]["labelClass"];
     var iconClassNames = "glyphicon " + stateMap[this.props.data.state]["iconClass"];
+    var warningSign = "";
+    if (this.props.data.warnings) {
+      warningSign = (<span className="warningSignWrapper">
+          <span className="glyphicon glyphicon-warning-sign">{this.props.data.warnings.length}</span>
+      </span>)
+    }
     return (
       <td className="host machine" id={"node-"+this.props.data.id}>
         <span className={labelClassNames}>
           <span className={iconClassNames}></span>
             {pad(this.props.hostIdx)}
-           <span className="warningSignWrapper">
-              <span className="glyphicon glyphicon-warning-sign">2</span>
-           </span>
+            {warningSign}
         </span>
       </td>
     );
