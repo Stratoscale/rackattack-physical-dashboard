@@ -48,7 +48,7 @@ var DashboardContent = React.createClass({
           <RackList hosts={this.props.hosts} />
         </section>
         <aside className="col-md-6">
-            <DashboardPanelGroup hosts={this.props.hosts} />
+            <DashboardPanelGroup allocations={this.props.allocations} hosts={this.props.hosts} />
         </aside>
       </div>
     );
@@ -320,7 +320,6 @@ var Stats = React.createClass({
 
 var StatesLegend = React.createClass({
   render: function() {
-    console.log("rendering legend");
     return (
       <div>
       <p><span className="label label-info"><span className="glyphicon glyphicon-backward"></span> QUICK_RECLAIMATION_IN_PROGRESS</span></p>
@@ -364,6 +363,120 @@ var StatesLegend = React.createClass({
   }
 });
 
+var AllocationRow = React.createClass({
+  render: function() {
+    return (
+          <tr className="allocation-row" onMouseOver={() => this.showAllocationHosts() }>
+            <td>
+              <div className="media">
+                <a className="media-left pull-left" href="#">
+                  <div className="color-swatch">3</div>
+                </a>
+                <div className="media-body">
+                  <div className="media-heading">{this.props.allocation.allocationInfo.user}</div>
+                  <ul className="hosts-list list-group">
+                    <li className="list-group-item">
+                      <span className="host-icon">
+                        <span className="glyphicon"></span>
+                      </span>
+                      <span className="test-name">test name</span> (
+                      <span data-bind="text: hostName">
+                      </span>)
+                      <div className="pull-right copy-command">
+                        <span className="glyphicon glyphicon-circle-arrow-right connect-link" >
+                        </span>
+                      </div>
+                      <span className="badge">
+                        <span>
+                        </span>
+                      </span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </td>
+            <td className="state-column">
+              <div>
+                <span className="label label-danger"> DEAD or DONE or WAIT </span>
+              </div>
+            </td>
+            <td>
+              {this.prettyDuration(this.props.allocation.duration)}
+            </td>
+          </tr>
+    );
+  },
+
+  prettyDuration: function(duration) {
+    var nrSeconds = parseInt(duration);
+    var nrMinutes = Math.floor(nrSeconds / 60);
+    if (nrMinutes == 0) {
+        nrMinutes = 1;
+    }
+    if (nrMinutes < 60) {
+        return nrMinutes + "m";
+    }
+    var nrHours = Math.floor(nrMinutes / 60);
+    if (nrHours < 24) {
+        result = nrHours + "h";
+        var nrMinutesResidue = nrMinutes % 60;
+        if (nrMinutesResidue > 0) {
+            result += " " + nrMinutesResidue + "m";
+        }
+        return result;
+    }
+    var nrHoursResidue = nrHours % 24;
+    var nrDays = Math.floor(nrHours / 24);
+    var result = nrDays + "d";
+    if (nrHoursResidue > 0) {
+        result += " " + nrHoursResidue + "h";
+    }
+    return result;
+  },
+
+  showAllocationHosts: function() {
+    console.log('asdasd');
+  }
+});
+
+var Allocations = React.createClass({
+  render: function() {
+    console.log(this.props.allocations[0]);
+    return (
+      <table className="table">
+        <thead>
+          <tr>
+            <th>Allocation</th>
+            <th>State</th>
+            <th>Duration</th>
+          </tr>
+        </thead>
+        <tbody>
+          {this.props.allocations.map(function(allocation) {
+            return <AllocationRow key={allocation.index} allocation={allocation} /> ;
+          })}
+        </tbody>
+      </table>
+    );
+  }
+});
+
+var Pools = React.createClass({
+  render: function() {
+    return (
+        <div>ad</div>
+    );
+  }
+});
+
+var Diagnostics = React.createClass({
+  render: function() {
+    return (
+        <div>ad</div>
+    );
+  }
+});
+
 var Panel = React.createClass({
   componentWillMount: function() {
     this.panelContent = "";
@@ -378,9 +491,7 @@ var Panel = React.createClass({
     }
     var panelCollapseClasses = "panel-collapse collapse";
     var isPanelActive = this.props.activePanelName == this.props.heading;
-    console.log(this.props.activePanelName + " is the active");
     if (this.props.isActiveByDefault && (!this.isDoneRenderingByDefault)) {
-        console.log("asdasd");
         panelCollapseClasses += " in";
     }
     this.panelContent = this.props.children;
@@ -433,14 +544,17 @@ var DashboardPanelGroup = React.createClass({
         <Panel heading="Allocations"
                setActivePanelCallback={this.setActivePanelCallback}
                activePanelName={this.state.activePanelName}>
+          <Allocations allocations={this.props.allocations} hosts={this.props.hosts} />
         </Panel>
         <Panel heading="Pools"
                setActivePanelCallback={this.setActivePanelCallback}
                activePanelName={this.state.activePanelName}>
+          <Pools hosts={this.props.hosts} />
         </Panel>
         <Panel heading="Diagnostics"
                setActivePanelCallback={this.setActivePanelCallback}
                activePanelName={this.state.activePanelName}>
+          <Diagnostics hosts={this.props.hosts} />
         </Panel>
         <Panel heading="Legend"
                setActivePanelCallback={this.setActivePanelCallback}
@@ -493,7 +607,7 @@ var Dashboard = React.createClass({
     if (this.state.loadState == "LOADING") {
       dashboardContent = <div className="col-md-6">Loading...</div>;
     } else if (this.state.loadState == "DONE") {
-      dashboardContent = <DashboardContent hosts={this.state.hosts} />;
+      dashboardContent = <DashboardContent allocations={this.state.allocations} hosts={this.state.hosts} />;
     }
     return (
       <div>
@@ -504,7 +618,7 @@ var Dashboard = React.createClass({
   },
 
   getInitialState: function() {
-    return {loadState: "LOADING", hosts: null};
+    return {loadState: "LOADING"};
   },
 
   newStateCallback: function(state) {
@@ -512,7 +626,7 @@ var Dashboard = React.createClass({
       this.forceUpdate();
       return;
     }
-    this.setState({loadState: "DONE", hosts: state["hosts"]});
+    this.setState({loadState: "DONE", hosts: state["hosts"], allocations: state["allocations"]});
   },
 
   changeStateToLoading: function(loadState, hosts) {
