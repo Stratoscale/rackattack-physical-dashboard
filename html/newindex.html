@@ -386,7 +386,11 @@ var AllocationRow = React.createClass({
                   <div className="media-heading">
                     {this.props.allocation.allocationInfo.user}
                   </div>
-                  <AllocationHosts hosts={this.props.hosts} allocationHosts={this.props.allocation.allocated} />
+                  <AllocationExtendedData
+                   hosts={this.props.hosts}
+                   allocatedHosts={this.props.allocation.allocated}
+                   allocationInfo={this.props.allocation.allocationInfo}
+                   />
                 </div>
               </div>
             </td>
@@ -437,6 +441,20 @@ var AllocationRow = React.createClass({
   hideAllocationHosts: function() {
     this.areHostsVisible = false;
     this.forceUpdate();
+  }
+});
+
+var AllocationExtendedData = React.createClass({
+  render: function() {
+    var hosts = this.props.hosts;
+    return (
+      <div className="hosts-list">
+        <small>Nice: {this.props.allocationInfo.nice}, Purpose: {this.props.allocationInfo.purpose}</small>
+        <AllocationHosts
+         hosts={this.props.hosts}
+         allocationHosts={this.props.allocatedHosts} />
+      </div>
+    );
   }
 });
 
@@ -497,7 +515,7 @@ var AllocationHosts = React.createClass({
         hosts.push(host);
     }
     return (
-      <ul className="hosts-list list-group">
+      <ul className="list-group">
         {hosts}
       </ul>
     );
