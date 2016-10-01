@@ -562,7 +562,7 @@ var AllocatedHostsCollection = React.createClass({
   }
 });
 
-var Pool = React.createClass({
+var UnallocatedHostCollection = React.createClass({
   render: function() {
     var hosts = this.props.hosts;
     var style = {backgroundColor: lotsOfColors[this.props.idx]};
@@ -575,28 +575,28 @@ var Pool = React.createClass({
           onMouseOver={() => this.showHostsInCollection() }
           onMouseOut={() => this.hideHostsInCollection() }>
         <td>
-            <div className="media">
-                <a className="media-left pull-left" href="#">
-                    <div className="color-swatch" style={style}>
-                      {hosts.length}
-                    </div>
-                </a>
-                <div className="media-body">
-                    <div className="media-heading">
-                      {this.props.name}
-                    </div>
-                    <ul className="hosts-list list-group">
-                      {hosts.map(function(host) {
-                         return (
-						   <HostRow
-							key={host.id}
-                            host={host}
-							allHosts={hosts} />
-                         );
-                       })}
-                    </ul>
-                </div>
+          <div className="media">
+            <a className="media-left pull-left" href="#">
+              <div className="color-swatch" style={style}>
+                {hosts.length}
+              </div>
+            </a>
+            <div className="media-body">
+              <div className="media-heading">
+                {this.props.name}
+              </div>
+              <ul className="hosts-list list-group">
+                {hosts.map(function(host) {
+                   return (
+		  	         <HostRow
+		  	  	      key={host.id}
+                      host={host}
+		  	  	      />
+                   );
+                 })}
+              </ul>
             </div>
+          </div>
         </td>
       </tr>
     );
@@ -618,13 +618,14 @@ var Pools = React.createClass({
     var hosts = this.props.hosts;
     var hostsByPools = _.groupBy(hosts, function(host) { return host.pool; });
     var poolNames = _.uniq(_.keys(hostsByPools));
+    poolNames.sort();
 
     return (
       <table className="table">
         <tbody>
           {_.map(poolNames, function(pool, idx) {
             return (
-		      <Pool key={pool} name={pool} allHosts={hosts} hosts={hostsByPools[pool]} idx={idx} />
+		      <UnallocatedHostCollection key={pool} name={pool} allHosts={hosts} hosts={hostsByPools[pool]} idx={idx} />
             );
            })}
         </tbody>
@@ -635,9 +636,87 @@ var Pools = React.createClass({
 
 var Diagnostics = React.createClass({
   render: function() {
+    var destructions = this.getDestructions();
+    var indications = this.getIndications();
     return (
-        <div>ad</div>
+      <div>
+        <h4>Destroyed Hosts</h4>
+        <table className="table">
+          <tbody>
+            {destructions}
+          </tbody>
+        </table>
+        <h4>Warning Indications</h4>
+        <table className="table">
+          <tbody>
+            {indications}
+          </tbody>
+        </table>
+      </div>
     );
+  },
+
+  getIndications: function() {
+    var indications = [];
+    var hostsPerIndication = this.getHostsPerIndication();
+    var idx = 0;
+    for (var indication in hostsPerIndication) {
+      var hosts = hostsPerIndication[indication];
+      indications.push(<UnallocatedHostCollection key={indication} name={indication} hosts={hosts} idx={idx} />);
+      idx += 1;
+    }
+    return indications;
+  },
+
+  getHostsPerIndication: function() {
+    var hostsPerIndication = {}
+    _.each(this.props.hosts, function(host) {
+      if (!("warnings" in host)) {
+        return;
+      }
+      _.each(host["warnings"], function(indication) {
+        if (!(indication in hostsPerIndication)) {
+            hostsPerIndication[indication] = new Array();
+        }
+        hostsPerIndication[indication].push(host);
+      });
+    });
+    return hostsPerIndication;
+  },
+
+  getDestructions: function() {
+    var destructions = [];
+    var hostsPerDestructionReason = this.getHostsPerDestruction(this.props.hosts);
+    var idx = 0;
+    for (var reason in hostsPerDestructionReason) {
+      var hosts = hostsPerDestructionReason[reason];
+      destructions.push(<UnallocatedHostCollection key={reason} name={reason} hosts={hosts} idx={idx} />);
+      idx += 1;
+    }
+    return destructions;
+  },
+
+  getHostsPerDestruction: function(hosts) {
+    var hostsPerDestructionReason = {}
+    _.each(hosts, function(host) {
+        if (!("reasonForDestruction" in host)) {
+            return;
+        }
+        var reason = host["reasonForDestruction"];
+        if ("DESTROYED" != host["state"]) {
+            return;
+        }
+        if (!reason) {
+            return;
+        }
+        if (!(reason in hostsPerDestructionReason)) {
+            hostsPerDestructionReason[reason] = new Array();
+        }
+        hostsPerDestructionReason[reason].push(host);
+    });
+    return hostsPerDestructionReason;
+    var destructionModel = [];
+    self.destructions(destructionModel);
   }
 });
 
