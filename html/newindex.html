@@ -57,7 +57,14 @@ var Dashboard = React.createClass({
   },
   render: function() {
     return (
-      <RackList hosts={this.state.hosts} />
+      <div className="row">
+        <div className="col-md-6">
+          <RackList hosts={this.state.hosts} />
+        </div>
+        <div className="col-md-6">
+          allocations
+        </div>
+      </div>
     );
   }
 });
