@@ -46,17 +46,29 @@ var DashboardContent = React.createClass({
     return {viewMode: "state"};
   },
 
+  getPoolsNames: function() {
+    var poolsNames = _.uniq(_.pluck(this.props.hosts, "pool"));
+    poolsNames.sort();
+    return poolsNames;
+  },
+
   render: function() {
+    var poolsNames = this.getPoolsNames()
     return (
       <div className="row">
         <section className="col-md-6">
           <ViewModeSelection setViewModeCallback={this.setViewMode} />
-          <RackList hosts={this.props.hosts} viewMode={this.state.viewMode} />
+          <RackList hosts={this.props.hosts}
+                    viewMode={this.state.viewMode}
+                    poolsNames={poolsNames}
+                    allocations={this.props.allocations} />
         </section>
         <aside className="col-md-6">
             <DashboardPanelGroup
              allocations={this.props.allocations}
-             hosts={this.props.hosts} />
+             hosts={this.props.hosts}
+             poolsNames={poolsNames}
+            />
         </aside>
       </div>
     );
@@ -134,13 +146,18 @@ var RackList = React.createClass({
     });
     var nrSlots = this.getNrSlotsInASingleRack(racksToHosts);
     var viewMode = this.props.viewMode;
+    var poolsNames = this.props.poolsNames;
+    var allocations = this.props.allocations;
     return _.map(orderedRacksIDs, function(rackID) {
         return (
             <Rack id={rackID}
              key={rackID}
              hosts={racksToHosts[rackID]}
              nrSlots={nrSlots}
-             viewMode={viewMode} />
+             viewMode={viewMode}
+             poolsNames={poolsNames}
+             allocations={allocations}
+             allHosts={hosts} />
         );
     });
   },
@@ -161,6 +178,9 @@ var Rack = React.createClass({
     var nrRows = Math.ceil(this.props.nrSlots / nrHostsPerRow);
     var rackID = "rack" + pad(this.props.id);
     var viewMode = this.props.viewMode;
+    var poolsNames = this.props.poolsNames;
+    var allocations = this.props.allocations;
+    var allHosts = this.props.allHosts;
     var rows = _.map(_.range(nrRows), function(rowNumber) {
         var idxOfFirstHostInRow = 1 + rowNumber * nrHostsPerRow;
         var rowHostsIndices = _.range(idxOfFirstHostInRow, idxOfFirstHostInRow + nrHostsPerRow);
@@ -170,7 +190,10 @@ var Rack = React.createClass({
                 return <Host data={hosts[hostID]}
                         key={hostID}
                         hostIdx={hostIdx} 
-                        viewMode={viewMode} />
+                        viewMode={viewMode} 
+                        poolsNames={poolsNames}
+                        allocations={allocations}
+                        allHosts={allHosts}/>
             }
             return <EmptyHostSlot hostID={hostID} key={hostID} hostIdx={hostIdx} />
         });
@@ -241,6 +264,7 @@ var Host = React.createClass({
     }
     return content;
   },
+
   componentDidMount: function() {
     var content = this.generatePopoverContent();
     $("#node-" + this.props.data.id).popover({
@@ -252,15 +276,38 @@ var Host = React.createClass({
       html: true
     });
   },
+
+  getAllocationIdx: function() {
+    var allHosts = this.props.allHosts;
+    var hostID = this.props.data.id;
+    return _.findIndex(this.props.allocations, function(allocation) {
+      for (var node in allocation.allocated) {
+        var hostIdxInHosts = allocation.allocated[node];
+        if (allHosts[hostIdxInHosts].id == hostID) {
+          return true;
+        }
+      }
+      return false;
+    });
+  },
+
   render: function() {
     var labelClassNames = "label machine-label";
     var outerSpanStyle = {};
     if (this.props.viewMode == "state") {
       labelClassNames += " " + stateMap[this.props.data.state]["labelClass"];
-    } else if (this.props.viewMode == "allocation") {
-      outerSpanStyle["backgroundColor"] = "red";
     } else if (this.props.viewMode == "pool") {
-      outerSpanStyle["backgroundColor"] = "blue";
+      var poolIdx = this.props.poolsNames.indexOf(this.props.data.pool);
+      outerSpanStyle["backgroundColor"] = lotsOfColors[poolIdx];
+    } else if (this.props.viewMode == "allocation") {
+      var allocationIdx = this.getAllocationIdx();
+      var color;
+      if (allocationIdx >= 0) {
+        color = lotsOfColors[allocationIdx];
+      } else {
+        color = "gray";
+      }
+      outerSpanStyle["backgroundColor"] = color;
     }
     var iconClassNames = "glyphicon " + stateMap[this.props.data.state]["iconClass"];
     var warningSign = "";
@@ -688,13 +735,11 @@ var Pools = React.createClass({
   render: function() {
     var hosts = this.props.hosts;
     var hostsByPools = _.groupBy(hosts, function(host) { return host.pool; });
-    var poolNames = _.uniq(_.keys(hostsByPools));
-    poolNames.sort();
 
     return (
       <table className="table">
         <tbody>
-          {_.map(poolNames, function(pool, idx) {
+          {this.props.poolsNames.map(function(pool, idx) {
             return (
 		      <UnallocatedHostCollection key={pool} name={pool} allHosts={hosts} hosts={hostsByPools[pool]} idx={idx} />
             );
@@ -863,7 +908,8 @@ var DashboardPanelGroup = React.createClass({
         <Panel heading="Pools"
                setActivePanelCallback={this.setActivePanelCallback}
                activePanelName={this.state.activePanelName}>
-          <Pools hosts={this.props.hosts} />
+          <Pools hosts={this.props.hosts} 
+                 poolsNames={this.props.poolsNames} />
         </Panel>
         <Panel heading="Diagnostics"
                setActivePanelCallback={this.setActivePanelCallback}
@@ -880,7 +926,8 @@ var DashboardPanelGroup = React.createClass({
   },
 
   setActivePanelCallback: function(panel) {
-    this.setState({activePanelName: panel});
+    this.state.activePanelName = panel;
+    this.forceUpdate();
   }
 });
 
