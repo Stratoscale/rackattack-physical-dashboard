@@ -21,20 +21,17 @@ var globalModelWebsocketSecret = "{{globalModelWebsocketSecret}}";
 </script>
 {% endblock %}
 
-<main class="container" id="content">
-    <div class="top-row">
-        <div class=="col-md-12">
-            {% for dashboardSource in dashboardSources %}
-            <button type="button" data-bind="click: function() { model.loadDashboard('{{ dashboardSource.name }}') }, css: classOfDashboardButton('{{ dashboardSource.name }}')">{{ dashboardSource.name }}</button>
-            {% endfor %}
-        </div>
-    </div>
-    <div id="dashboardInfo">
-    </div>
-</main>
-
 <script type="text/babel">
 var nrHostsPerRow = 2;
+
+var rackattackInstances = [
+{% for dashboardSource in dashboardSources %}
+{name: "{{ dashboardSource.name }}", host: "{{ dashboardSource.host }}"},
+{% endfor %}
+]
+var activeDashboardName = "";
+var activeDashboardHost = "";
+var ui = new RealTimeWebUI();
 
 function pad(str) {
     str = str.toString();
@@ -43,30 +40,21 @@ function pad(str) {
     return ans;
 }
 
-var Dashboard = React.createClass({
-  changeState: function(state) {
-    this.setState({hosts: state["hosts"]});
-  },
-  componentDidMount: function() {
-    var ui = new RealTimeWebUI();
-    var dashboardSource = "status_" +  "Bezeq";
-    ui.register(dashboardSource, this.changeState);
-  },
-  getInitialState: function() {
-    return this.props.data;
-  },
+var DashboardContent = React.createClass({
   render: function() {
     return (
       <div className="row">
         <div className="col-md-6">
-          <RackList hosts={this.state.hosts} />
+          <button type="button" onClick={this.bla}>asd</button>
+          <RackList hosts={this.props.hosts} />
         </div>
         <div className="col-md-6">
           allocations
         </div>
       </div>
     );
-  }
+  },
+
 });
 
 var RackList = React.createClass({
@@ -184,8 +172,6 @@ var Host = React.createClass({
             content += "<li>" + warning + "</li>";
         }
         content += "</ul></span>";
-    } else {
-        console.log('no warning!');
     }
     if (this.props.data.reasonForDestruction) {
         content += "<div class='text-danger'>Reason for destruction: " + this.props.data.reasonForDestruction + "</span>";
@@ -237,11 +223,91 @@ var EmptyHostSlot = React.createClass({
   }
 });
 
+var DashboardNav = React.createClass({
+  render: function() {
+    return (
+    <nav className="container navbar navbar-default">
+      <ul className="nav navbar-nav">
+    {% for dashboardSource in dashboardSources %}
+        <li>
+          <a onClick={ () => this.props.changeDashboardSourceCallback('{{ dashboardSource.name }}') } >
+            {{ dashboardSource.name }}
+          </a>
+        </li>
+    {% endfor %}
+      </ul>
+    </nav> );
+  },
+});
+
 var initialState = {hosts: [], allocations: []}
+var Dashboard = React.createClass({
+  render: function() {
+    var dashboardContent;
+    if (this.state.loadState == "LOADING") {
+      dashboardContent = <div className="col-md-6">Loading...</div>;
+    } else if (this.state.loadState == "DONE") {
+      dashboardContent = <DashboardContent hosts={this.state.hosts} />;
+    }
+    return (
+      <div>
+        <DashboardNav changeDashboardSourceCallback={this.loadDashboard} />
+        {dashboardContent}
+      </div>
+    );
+  },
+
+  getInitialState: function() {
+    return {loadState: "LOADING", hosts: null};
+  },
+
+  newStateCallback: function(state) {
+    if (state === null) {
+      this.forceUpdate();
+      return;
+    }
+    this.setState({loadState: "DONE", hosts: state["hosts"]});
+  },
+
+  changeStateToLoading: function(loadState, hosts) {
+    this.setState({loadState: "LOADING"});
+  },
+
+  loadDashboard: function(dashboardName) {
+    this.changeStateToLoading();
+    if (activeDashboardName != "") {
+        ui.unregister("status_" + activeDashboardName, this.newStateCallback);
+    }
+    activeDashboardName = "";
+    _.each(rackattackInstances, function(instance) {
+      if (instance["name"] == dashboardName) {
+        activeDashboardHost = instance["host"];
+        return;
+      }
+    }); ui.register("status_" + dashboardName, this.newStateCallback);
+    activeDashboardName = dashboardName;
+    window.history.pushState("", dashboardName, "/" + dashboardName);
+  },
+
+  componentDidMount: function() {
+    this.loadDefaultDashboard();
+  },
+
+  loadDefaultDashboard: function() {
+    var defaultDashboard = "{{ defaultDashboard }}";
+    if (!defaultDashboard) {
+        defaultDashboard = rackattackInstances[0]["name"];
+    }
+    this.loadDashboard(defaultDashboard);
+  }
+});
+
 ReactDOM.render(
-  <Dashboard data={initialState} />,
-  document.getElementById('dashboardInfo')
+  <Dashboard />,
+  document.getElementById('content')
 );
 </script>
+
+<main class="container" id="content"></main>
 
 {% endblock %}
