@@ -45,7 +45,6 @@ var DashboardContent = React.createClass({
     return (
       <div className="row">
         <div className="col-md-6">
-          <button type="button" onClick={this.bla}>asd</button>
           <RackList hosts={this.props.hosts} />
         </div>
         <div className="col-md-6">
@@ -229,8 +228,8 @@ var DashboardNav = React.createClass({
     <nav className="container navbar navbar-default">
       <ul className="nav navbar-nav">
     {% for dashboardSource in dashboardSources %}
-        <li>
-          <a onClick={ () => this.props.changeDashboardSourceCallback('{{ dashboardSource.name }}') } >
+        <li id="navButton_{{ dashboardSource.name }}">
+          <a href="#" onClick={ () => this.props.changeDashboardSourceCallback('{{ dashboardSource.name }}') } >
             {{ dashboardSource.name }}
           </a>
         </li>
@@ -276,6 +275,7 @@ var Dashboard = React.createClass({
   loadDashboard: function(dashboardName) {
     this.changeStateToLoading();
     if (activeDashboardName != "") {
+        document.getElementById("navButton_" + activeDashboardName).className = "";
         ui.unregister("status_" + activeDashboardName, this.newStateCallback);
     }
     activeDashboardName = "";
@@ -287,6 +287,7 @@ var Dashboard = React.createClass({
     }); ui.register("status_" + dashboardName, this.newStateCallback);
     activeDashboardName = dashboardName;
     window.history.pushState("", dashboardName, "/" + dashboardName);
+    document.getElementById("navButton_" + dashboardName).className = "active";
   },
 
   componentDidMount: function() {
