@@ -364,40 +364,35 @@ var StatesLegend = React.createClass({
 });
 
 var AllocationRow = React.createClass({
+  componentWillMount: function() {
+    this.areHostsVisible = false;
+  },
+
   render: function() {
+    var tableRowClasses = "allocation-row";
+    if (this.areHostsVisible) {
+      tableRowClasses += " hover";
+    }
     return (
-          <tr className="allocation-row" onMouseOver={() => this.showAllocationHosts() }>
+          <tr className={tableRowClasses}
+              onMouseOver={() => this.showAllocationHosts() }
+              onMouseOut={() => this.hideAllocationHosts() }>
             <td>
               <div className="media">
                 <a className="media-left pull-left" href="#">
                   <div className="color-swatch">3</div>
                 </a>
                 <div className="media-body">
-                  <div className="media-heading">{this.props.allocation.allocationInfo.user}</div>
-                  <ul className="hosts-list list-group">
-                    <li className="list-group-item">
-                      <span className="host-icon">
-                        <span className="glyphicon"></span>
-                      </span>
-                      <span className="test-name">test name</span> (
-                      <span data-bind="text: hostName">
-                      </span>)
-                      <div className="pull-right copy-command">
-                        <span className="glyphicon glyphicon-circle-arrow-right connect-link" >
-                        </span>
-                      </div>
-                      <span className="badge">
-                        <span>
-                        </span>
-                      </span>
-                    </li>
-                  </ul>
+                  <div className="media-heading">
+                    {this.props.allocation.allocationInfo.user}
+                  </div>
+                  <AllocationHosts hosts={this.props.hosts} allocationHosts={this.props.allocation.allocated} />
                 </div>
               </div>
             </td>
             <td className="state-column">
               <div>
-                <span className="label label-danger"> DEAD or DONE or WAIT </span>
+                <span className="label label-danger">WAIT</span>
               </div>
             </td>
             <td>
@@ -435,13 +430,19 @@ var AllocationRow = React.createClass({
   },
 
   showAllocationHosts: function() {
-    console.log('asdasd');
+    this.areHostsVisible = true;
+    this.forceUpdate();
+  },
+
+  hideAllocationHosts: function() {
+    this.areHostsVisible = false;
+    this.forceUpdate();
   }
 });
 
 var Allocations = React.createClass({
   render: function() {
-    console.log(this.props.allocations[0]);
+    var hosts = this.props.hosts;
     return (
       <table className="table">
         <thead>
@@ -453,10 +454,52 @@ var Allocations = React.createClass({
         </thead>
         <tbody>
           {this.props.allocations.map(function(allocation) {
-            return <AllocationRow key={allocation.index} allocation={allocation} /> ;
+            return <AllocationRow key={allocation.index} allocation={allocation} hosts={hosts} /> ;
           })}
         </tbody>
       </table>
+    );
+  }
+});
+
+var AllocationHost = React.createClass({
+  render: function() {
+    var host = this.props.hosts[this.props.hostIdx];
+    return (
+        <li className="list-group-item">
+          <span className="host-icon">
+            <span className="glyphicon">
+            </span>
+          </span>
+          <span className="test-name">
+            {this.props.nodeName}
+          </span> (
+          <span>
+            {host.id}
+          </span>)
+          <div className="pull-right copy-command">
+            <span className="glyphicon glyphicon-circle-arrow-right connect-link" >
+            </span>
+          </div>
+          <span className="badge">
+            {host.ipAddress}
+          </span>
+        </li>
+    );
+  }
+});
+var AllocationHosts = React.createClass({
+  render: function() {
+    var hosts = [];
+    for (var nodeName in this.props.allocationHosts) {
+        var hostIdx = this.props.allocationHosts[nodeName];
+        var host = <AllocationHost key={hostIdx} hostIdx={hostIdx} nodeName={nodeName} hosts={this.props.hosts}/>
+        hosts.push(host);
+    }
+    return (
+      <ul className="hosts-list list-group">
+        {hosts}
+      </ul>
     );
   }
 });
