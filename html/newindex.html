@@ -44,12 +44,12 @@ var DashboardContent = React.createClass({
   render: function() {
     return (
       <div className="row">
-        <div className="col-md-6">
+        <section className="col-md-6">
           <RackList hosts={this.props.hosts} />
-        </div>
-        <div className="col-md-6">
-          allocations
-        </div>
+        </section>
+        <aside className="col-md-6">
+            <DashboardPanelGroup hosts={this.props.hosts} />
+        </aside>
       </div>
     );
   },
@@ -206,6 +206,253 @@ var Host = React.createClass({
         </span>
       </td>
     );
+  }
+});
+
+var Stats = React.createClass({
+  render: function() {
+    return (
+            <ul className="list-group">
+              <li className="list-group-item">
+                <span className="label label-primary">
+                  <span className="glyphicon glyphicon-pause">
+                  </span>
+                  Available
+                </span>
+                 (checked in) hosts in default pool:
+                <span className="badge badge-primary">
+                  {this.nrHosts('default', 'CHECKED_IN')}
+                </span>
+              </li>
+              <li className="list-group-item">
+                <span className="label label-primary">
+                  <span className="glyphicon glyphicon-pause">
+                  </span>
+                  Available
+                </span>
+                 (checked in) in non-default pools:
+                <span className="badge badge-primary">
+                  {this.nrHosts('', 'CHECKED_IN') - this.nrHosts('default', 'CHECKED_IN')}
+                </span>
+              </li>
+              <li className="list-group-item">
+                <span className="label label-danger">
+                  <span className="glyphicon glyphicon-remove">
+                  </span>
+                  Destroyed
+                </span>
+                 hosts:
+                <span className="badge badge-danger">
+                  {this.nrHosts('', 'DESTROYED')}
+                </span>
+              </li>
+              <li className="list-group-item">
+                <span className="label label-default-dark">
+                  <span className="glyphicon glyphicon-off">
+                  </span>
+                  Offline
+                </span>
+                 hosts:
+                <span className="badge badge-dark">
+                  {this.nrHosts('', 'OFFLINE')}
+                </span>
+              </li>
+              <li className="list-group-item">
+                <span className="label label-success">
+                  <span className="glyphicon glyphicon-ok">
+                  </span>
+                  In-use
+                </span>
+                 (Inauguration Done) hosts:
+                <span className="badge badge-success">
+                  {this.nrHosts('', 'INAUGURATION_DONE')}
+                </span>
+              </li>
+              <li className="list-group-item">
+                <span className="label label-detached">
+                  <span className="glyphicon glyphicon-eject">
+                  </span>
+                  Detached
+                </span>
+                hosts:
+                <span className="badge badge-detached">
+                  {this.nrHosts('', 'DETACHED')}
+                </span>
+              </li>
+              <li className="list-group-item">
+                Total Nr. of hosts:
+                <span className="badge badge">
+                  {this.nrHosts('', '')}
+                </span>
+              </li>
+              <li className="list-group-item">
+                Current hosts usage:
+                <span className="badge badge">
+                  {(((this.nrHosts('', 'INAUGURATION_DONE') + this.nrHosts('', 'DETACHED')) / this.nrHosts('', '')) * 100).toFixed(0).toString() + '%'}
+                </span>
+              </li>
+            </ul>
+    );
+  },
+
+  nrHosts: function(pool, state) {
+    var hosts = this.props.hosts;
+    if (hosts === undefined) {
+        return 0;
+    }
+    if (!pool && !state) {
+        return hosts.length;
+    }
+    hosts = _.countBy(hosts, function(host) {
+        var condition = host.state == state;
+        if (pool) {
+            condition = condition && (host.pool == pool);
+        }
+        return condition;
+    })[true];
+    if (hosts === undefined) {
+        return 0;
+    }
+    return hosts;
+  }
+});
+
+
+var StatesLegend = React.createClass({
+  render: function() {
+    console.log("rendering legend");
+    return (
+      <div>
+      <p><span className="label label-info"><span className="glyphicon glyphicon-backward"></span> QUICK_RECLAIMATION_IN_PROGRESS</span></p>
+      <p>Quick reclaim works using kexecing the inaugurator on the host
+      </p>
+      <p><span className="label label-warning"><span className="glyphicon glyphicon-fast-backward"></span> SLOW_RECLAIMATION_IN_PROGRESS</span></p>
+      <p>
+          Slow reclaim works by rebooting the server and using PXE to load the inaugurator.
+          This is slow since a server takes minutes to reboot, plus, more than one reboot
+          might be required.
+      </p>
+      <p><span className="label label-primary"><span className="glyphicon glyphicon-pause"></span> CHECKED_IN</span></p>
+      <p>
+          The inaugurator has booted successfully, and is waiting for the command to switch
+          a rootfs. The current rootfs is being hashed in the background.
+      </p>
+      <p><span className="label label-info"><span className="glyphicon glyphicon-play"></span> INAUGURATION_LABEL_PROVIDED</span></p>
+      <p>
+          The inaugurator is replacing the rootfs in this host.
+      </p>
+      <p><span className="label label-success"><span className="glyphicon glyphicon-ok"></span> INAUGURATION_DONE</span></p>
+      <p>
+          The inaugurator has finished replacing the rootfs. This host was kexeced into
+          its image, which if not hung, means the test itself is running.
+      </p>
+      <p><span className="label label-danger"><span className="glyphicon glyphicon-remove"></span> DESTROYED</span></p>
+      <p>
+          A temporary stage, on the road for the host to drop out of the cluster. This
+          happens if 5 slow reclamations failed on this host
+      </p>
+      <p><span className="label label-default-dark"><span className="glyphicon glyphicon-off"></span> OFFLINE</span></p>
+      <p>
+          The server is off.
+      </p>
+      <p><span className="label label-detached"><span className="glyphicon glyphicon-eject"></span> DETACHED</span></p>
+      <p>
+          A temporary state which "freezes" the server at the moment it was detached; Rackattack will not shut it off or reclaim it in this state, nor will it be available for allocation. Meant for debugging or one-time-inaugurations.
+      </p>
+      </div>
+    );
+  }
+});
+
+var Panel = React.createClass({
+  componentWillMount: function() {
+    this.panelContent = "";
+    this.isDoneRenderingByDefault = false;
+  },
+
+  render: function() {
+    var panelID = this.props.heading + "_Panel";
+    var panelBodyClasses = "panel-body";
+    if (this.props.noPanelPadding) {
+        panelBodyClasses += " panel-body-with-list-group";
+    }
+    var panelCollapseClasses = "panel-collapse collapse";
+    var isPanelActive = this.props.activePanelName == this.props.heading;
+    console.log(this.props.activePanelName + " is the active");
+    if (this.props.isActiveByDefault && (!this.isDoneRenderingByDefault)) {
+        console.log("asdasd");
+        panelCollapseClasses += " in";
+    }
+    this.panelContent = this.props.children;
+    var children;
+    if (isPanelActive) {
+        children = this.panelContent;
+    } else {
+        children = "Loading...";
+    }
+    return (
+      <div className="panel panel-default">
+        <div className="panel-heading">
+            <h3 className="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href={"#" + panelID}
+                   onClick={ () => this.setActivePanel(this.props.heading) }>
+                  {this.props.heading}
+                </a>
+            </h3>
+        </div>
+        <div id={panelID} className={panelCollapseClasses}>
+            <div className={panelBodyClasses}>
+              {children}
+            </div>
+        </div>
+      </div>
+    );
+  },
+
+  setActivePanel: function(panel) {
+    this.isDoneRenderingByDefault = true;
+    this.props.setActivePanelCallback(panel);
+  }
+});
+
+var DashboardPanelGroup = React.createClass({
+  getInitialState: function() {
+    return {activePanelName: "Stats"};
+  },
+
+  render: function() {
+    return (
+      <div className="panel-group" id="accordion">
+        <Panel setActivePanelCallback={this.setActivePanelCallback}
+               activePanelName={this.state.activePanelName}
+               heading="Stats"
+               noPanelPadding={true}
+               isActiveByDefault={true}>
+          <Stats hosts={this.props.hosts} />
+        </Panel>
+        <Panel heading="Allocations"
+               setActivePanelCallback={this.setActivePanelCallback}
+               activePanelName={this.state.activePanelName}>
+        </Panel>
+        <Panel heading="Pools"
+               setActivePanelCallback={this.setActivePanelCallback}
+               activePanelName={this.state.activePanelName}>
+        </Panel>
+        <Panel heading="Diagnostics"
+               setActivePanelCallback={this.setActivePanelCallback}
+               activePanelName={this.state.activePanelName}>
+        </Panel>
+        <Panel heading="Legend"
+               setActivePanelCallback={this.setActivePanelCallback}
+               activePanelName={this.state.activePanelName}>
+            <StatesLegend />
+        </Panel>
+      </div>
+    );
+  },
+
+  setActivePanelCallback: function(panel) {
+    this.setState({activePanelName: panel});
   }
 });
 
