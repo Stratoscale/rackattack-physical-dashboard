@@ -59,7 +59,7 @@ root.putChild("js", static.File(os.path.join(args.dashboardRoot, "js")))
 root.putChild("static", static.File(os.path.join(args.dashboardRoot, "static")))
 root.putChild("favicon.ico", static.File(os.path.join(args.dashboardRoot, "static", "favicon.ico")))
 root.putChild("wallboard", rootresource.Renderer("index-wallboard.html", {}))
-root.putChild("newindex", rootresource.Renderer("newindex.html", {}))
+root.putChild("dashboard.js", rootresource.Renderer("dashboard.js", {}))
 root.putChild("seriallogs", static.File("/var/lib/rackattackphysical/seriallogs"))
 for dashboardSource in dashboardSources:
     root.putChild(dashboardSource["name"],
