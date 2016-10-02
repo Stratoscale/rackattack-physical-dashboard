@@ -316,13 +316,16 @@ var Host = React.createClass({
           <span className="glyphicon glyphicon-warning-sign">{this.props.data.warnings.length}</span>
       </span>)
     }
+    var logURL = "http://" + activeDashboardHost + ":" + "6001" + "/seriallogs/" + this.props.data.id + "-serial.txt";
     return (
       <td className="host machine" id={"node-"+this.props.data.id}>
-        <span className={labelClassNames} style={outerSpanStyle} >
-          <span className={iconClassNames}></span>
-            {pad(this.props.hostIdx)}
-            {warningSign}
-        </span>
+        <a class="machine-link" href={logURL} target="_new">
+          <span className={labelClassNames} style={outerSpanStyle} >
+            <span className={iconClassNames}></span>
+              {pad(this.props.hostIdx)}
+              {warningSign}
+          </span>
+        </a>
       </td>
     );
   }
