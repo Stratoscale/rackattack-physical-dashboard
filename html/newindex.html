@@ -23,6 +23,7 @@ var globalModelWebsocketSecret = "{{globalModelWebsocketSecret}}";
 
 <script type="text/babel">
 var nrHostsPerRow = 2;
+var NAT_ADDR = "rackattack-nat.dc1";
 
 var rackattackInstances = [
 {% for dashboardSource in dashboardSources %}
@@ -41,6 +42,18 @@ function pad(str) {
     return ans;
 }
 
+function getAllocationIdxByHostID(hostID, hostsByIndices, allocations) {
+ return _.findIndex(allocations, function(allocation) {
+   for (var node in allocation.allocated) {
+     var hostIdxInHosts = allocation.allocated[node];
+     if (hostsByIndices[hostIdxInHosts].id == hostID) {
+       return true;
+     }
+   }
+   return false;
+  });
+}
+
 var DashboardContent = React.createClass({
   getInitialState: function() {
     return {viewMode: "state"};
@@ -52,8 +65,23 @@ var DashboardContent = React.createClass({
     return poolsNames;
   },
 
+  getHostsByIndices: function() {
+    var result = {};
+    _.each(this.props.hosts, function(host){
+      result[host.index] = host;
+    });
+    return result;
+  },
+
   render: function() {
     var poolsNames = this.getPoolsNames()
+    var blinkingHostsIDs;
+    if (this.blinkingHostsIDs === undefined) {
+        blinkingHostsIDs = [];
+    } else {
+        blinkingHostsIDs = this.blinkingHostsIDs;
+    }
+    this.hostsByIndices = this.getHostsByIndices();
     return (
       <div className="row">
         <section className="col-md-6">
@@ -61,13 +89,18 @@ var DashboardContent = React.createClass({
           <RackList hosts={this.props.hosts}
                     viewMode={this.state.viewMode}
                     poolsNames={poolsNames}
-                    allocations={this.props.allocations} />
+                    allocations={this.props.allocations}
+                    hostsByIndices={this.hostsByIndices}
+                    blinkingHostsIDs={blinkingHostsIDs} />
         </section>
         <aside className="col-md-6">
             <DashboardPanelGroup
              allocations={this.props.allocations}
              hosts={this.props.hosts}
              poolsNames={poolsNames}
+             startBlinkingCallback={this.startBlinking}
+             stopBlinkingCallback={this.stopBlinking}
+             hostsByIndices={this.hostsByIndices}
             />
         </aside>
       </div>
@@ -77,7 +110,17 @@ var DashboardContent = React.createClass({
   setViewMode: function(viewMode) {
     this.state.viewMode = viewMode;
     this.forceUpdate();
-  }
+  },
+
+  startBlinking: function(hostsIDs) {
+    this.blinkingHostsIDs = hostsIDs;
+    this.forceUpdate();
+  },
+
+  stopBlinking: function() {
+    this.blinkingHostsIDs = [];
+    this.forceUpdate();
+  },
 });
 
 var ViewModeOption = React.createClass({
@@ -148,6 +191,8 @@ var RackList = React.createClass({
     var viewMode = this.props.viewMode;
     var poolsNames = this.props.poolsNames;
     var allocations = this.props.allocations;
+    var blinkingHostsIDs = this.props.blinkingHostsIDs;
+    var hostsByIndices = this.props.hostsByIndices;
     return _.map(orderedRacksIDs, function(rackID) {
         return (
             <Rack id={rackID}
@@ -157,7 +202,9 @@ var RackList = React.createClass({
              viewMode={viewMode}
              poolsNames={poolsNames}
              allocations={allocations}
-             allHosts={hosts} />
+             allHosts={hosts}
+             hostsByIndices={hostsByIndices}
+             blinkingHostsIDs={blinkingHostsIDs} />
         );
     });
   },
@@ -181,11 +228,14 @@ var Rack = React.createClass({
     var poolsNames = this.props.poolsNames;
     var allocations = this.props.allocations;
     var allHosts = this.props.allHosts;
+    var blinkingHostsIDs = this.props.blinkingHostsIDs;
+    var hostsByIndices = this.props.hostsByIndices;
     var rows = _.map(_.range(nrRows), function(rowNumber) {
         var idxOfFirstHostInRow = 1 + rowNumber * nrHostsPerRow;
         var rowHostsIndices = _.range(idxOfFirstHostInRow, idxOfFirstHostInRow + nrHostsPerRow);
         var rowHosts = _.map(rowHostsIndices, function(hostIdx) {
             var hostID = rackID + "-server" + pad(hostIdx);
+            var blink = blinkingHostsIDs.indexOf(hostID) >= 0;
             if (hostID in hosts) {
                 return <Host data={hosts[hostID]}
                         key={hostID}
@@ -193,7 +243,9 @@ var Rack = React.createClass({
                         viewMode={viewMode} 
                         poolsNames={poolsNames}
                         allocations={allocations}
-                        allHosts={allHosts}/>
+                        allHosts={allHosts} 
+                        hostsByIndices={hostsByIndices}
+                        blink={blink} />
             }
             return <EmptyHostSlot hostID={hostID} key={hostID} hostIdx={hostIdx} />
         });
@@ -205,9 +257,9 @@ var Rack = React.createClass({
     var rackRows = this.getRackRows(this.props.hosts);
     return (
       <div className="rack col-md-4">
-        <h2>
+        <h3>
           Rack {this.props.id}
-        </h2>
+        </h3>
         <table className="rack-table">
           <tbody>
             {rackRows}
@@ -238,7 +290,6 @@ var stateMap = {
     "OFFLINE":{ iconClass: "glyphicon-off", labelClass: "label-default-dark" },
     "DETACHED":{ iconClass: "glyphicon-eject", labelClass: "label-detached" }
 };
-var NAT_ADDR = "rackattack-nat.dc1";
 
 var Host = React.createClass({
   getNatPortFromInnerIPAddress: function(ipAddress) {
@@ -280,15 +331,7 @@ var Host = React.createClass({
   getAllocationIdx: function() {
     var allHosts = this.props.allHosts;
     var hostID = this.props.data.id;
-    return _.findIndex(this.props.allocations, function(allocation) {
-      for (var node in allocation.allocated) {
-        var hostIdxInHosts = allocation.allocated[node];
-        if (allHosts[hostIdxInHosts].id == hostID) {
-          return true;
-        }
-      }
-      return false;
-    });
+    return getAllocationIdxByHostID(hostID, this.props.hostsByIndices, this.props.allocations);
   },
 
   render: function() {
@@ -309,6 +352,10 @@ var Host = React.createClass({
       }
       outerSpanStyle["backgroundColor"] = color;
     }
+    var classes = "host machine";
+    if (this.props.blink) {
+		classes += " node-when-allocation-is-hovered";
+    }
     var iconClassNames = "glyphicon " + stateMap[this.props.data.state]["iconClass"];
     var warningSign = "";
     if (this.props.data.warnings) {
@@ -318,8 +365,8 @@ var Host = React.createClass({
     }
     var logURL = "http://" + activeDashboardHost + ":" + "6001" + "/seriallogs/" + this.props.data.id + "-serial.txt";
     return (
-      <td className="host machine" id={"node-"+this.props.data.id}>
-        <a class="machine-link" href={logURL} target="_new">
+      <td className={classes} id={"node-"+this.props.data.id}>
+        <a className="machine-link" href={logURL} target="_new">
           <span className={labelClassNames} style={outerSpanStyle} >
             <span className={iconClassNames}></span>
               {pad(this.props.hostIdx)}
@@ -530,12 +577,13 @@ var AllocationRow = React.createClass({
                 </a>
                 <div className="media-body">
                   <div className="media-heading">
-                    {this.props.allocation.allocationInfo.user} {this.props.rowIdx}
+                    {this.props.allocation.allocationInfo.user}
                   </div>
                   <AllocationExtendedData
                    hosts={this.props.hosts}
                    allocatedHosts={this.props.allocation.allocated}
                    allocationInfo={this.props.allocation.allocationInfo}
+                   hostsByIndices={this.props.hostsByIndices}
                    />
                 </div>
               </div>
@@ -581,12 +629,21 @@ var AllocationRow = React.createClass({
 
   showHostsInCollection: function() {
     this.areHostsVisible = true;
-    this.forceUpdate();
+    var indices = _.values(this.props.allocation.allocated)
+    var blinkingHostsIDs = this.hostsIndicesToIDs(indices);
+    this.props.startBlinkingCallback(blinkingHostsIDs)
   },
 
   hideHostsInCollection: function() {
     this.areHostsVisible = false;
-    this.forceUpdate();
+    this.props.stopBlinkingCallback()
+  },
+
+  hostsIndicesToIDs: function(hostsIndices) {
+	var hostsByIndices = this.props.hostsByIndices;
+    return hostsIndices.map(function(hostIndex) {
+        return hostsByIndices[hostIndex].id;
+    });
   }
 });
 
@@ -597,7 +654,8 @@ var AllocationExtendedData = React.createClass({
         <small>Nice: {this.props.allocationInfo.nice}, Purpose: {this.props.allocationInfo.purpose}</small>
         <AllocatedHostsCollection
          allHosts={this.props.hosts}
-         hosts={this.props.allocatedHosts} />
+         hosts={this.props.allocatedHosts}
+         hostsByIndices={this.props.hostsByIndices} />
       </div>
     );
   }
@@ -606,6 +664,9 @@ var AllocationExtendedData = React.createClass({
 var Allocations = React.createClass({
   render: function() {
     var hosts = this.props.hosts;
+    var startBlinkingCallback = this.props.startBlinkingCallback;
+    var stopBlinkingCallback = this.props.stopBlinkingCallback;
+    var hostsByIndices = this.props.hostsByIndices;
     return (
       <table className="table">
         <thead>
@@ -621,7 +682,11 @@ var Allocations = React.createClass({
                     rowIdx={index}
                     key={allocation.index}
                     allocation={allocation}
-                    hosts={hosts} /> ;
+                    hosts={hosts}
+                    startBlinkingCallback={startBlinkingCallback}
+                    stopBlinkingCallback={stopBlinkingCallback}
+                    hostsByIndices={hostsByIndices}
+                    />;
           })}
         </tbody>
       </table>
@@ -633,15 +698,21 @@ var HostRow = React.createClass({
   render: function() {
 	var host;
     var text;
+    var copyButton;
     if (this.props.nodeName) {
-      host = this.props.allHosts[this.props.hostIdx];
-      text = this.props.nodeName + "(" + host.id + ")";
+      this.host = this.props.hostsByIndices[this.props.hostIdx];
+      text = this.props.nodeName + "(" + this.host.id + ")";
+      copyButton = (<div className="pull-right copy-command">
+                      <span onClick={this.copyConnectionString} className="glyphicon glyphicon-circle-arrow-right connect-link" >
+                      </span>
+                    </div>);
     } else {
-      host = this.props.host;
-      text = host.id
+      this.host = this.props.host;
+      text = this.host.id
+      copyButton = "";
     }
-    var hostIconClasses = "host-icon " + stateMap[host.state]["labelClass"].replace('label', 'text');
-    var innerHostIconClasses = "glyphicon " + stateMap[host.state]["iconClass"];
+    var hostIconClasses = "host-icon " + stateMap[this.host.state]["labelClass"].replace('label', 'text');
+    var innerHostIconClasses = "glyphicon " + stateMap[this.host.state]["iconClass"];
     return (
         <li className="list-group-item">
           <span className={hostIconClasses}>
@@ -650,16 +721,23 @@ var HostRow = React.createClass({
           </span>
           &nbsp;
           {this.props.nodeName}
-          ({host.id})
-          <div className="pull-right copy-command">
-            <span className="glyphicon glyphicon-circle-arrow-right connect-link" >
-            </span>
-          </div>
+          ({this.host.id})
+          {copyButton}
           <span className="badge">
-            {host.ipAddress}
+            {this.host.ipAddress}
           </span>
         </li>
     );
+  },
+
+  getNatPortFromInnerIPAddress: function(ipAddress) {
+    return 2000 + parseInt(ipAddress.split(".")[3]) + (parseInt(ipAddress.split(".")[2]) - 1) * 256;
+  },
+
+  copyConnectionString: function() {
+    var port = this.getNatPortFromInnerIPAddress(this.host.ipAddress);
+    var text = "sshpass -p rackattack ssh -o ServerAliveInterval=5 -o ServerAliveCountMax=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@" + NAT_ADDR + " -p " + port;
+    window.prompt("Copy to clipboard: Ctrl+C, Enter", text);
   }
 });
 
@@ -672,7 +750,9 @@ var AllocatedHostsCollection = React.createClass({
                     key={hostIdx}
                     hostIdx={hostIdx}
                     nodeName={nodeName}
-                    allHosts={this.props.allHosts} />
+                    allHosts={this.props.allHosts} 
+                    hostsByIndices={this.props.hostsByIndices}
+                    />
         hosts.push(host);
     }
     return (
@@ -693,7 +773,7 @@ var UnallocatedHostCollection = React.createClass({
     }
     return (
       <tr className={tableRowClasses}
-          onMouseOver={() => this.showHostsInCollection() }
+          onMouseOver={() => this.showHostsInCollection(hosts) }
           onMouseOut={() => this.hideHostsInCollection() }>
         <td>
           <div className="media">
@@ -723,13 +803,15 @@ var UnallocatedHostCollection = React.createClass({
     );
   },
 
-  showHostsInCollection: function() {
+  showHostsInCollection: function(hosts) {
+ 	var hostsIDs = _.pluck(hosts, "id");
     this.areHostsVisible = true;
-    this.forceUpdate();
+    this.props.startBlinkingCallback(hostsIDs)
   },
 
   hideHostsInCollection: function() {
     this.areHostsVisible = false;
+    this.props.stopBlinkingCallback()
     this.forceUpdate();
   }
 });
@@ -738,13 +820,20 @@ var Pools = React.createClass({
   render: function() {
     var hosts = this.props.hosts;
     var hostsByPools = _.groupBy(hosts, function(host) { return host.pool; });
-
+    var startBlinkingCallback = this.props.startBlinkingCallback;
+    var stopBlinkingCallback = this.props.stopBlinkingCallback;
     return (
       <table className="table">
         <tbody>
           {this.props.poolsNames.map(function(pool, idx) {
             return (
-		      <UnallocatedHostCollection key={pool} name={pool} allHosts={hosts} hosts={hostsByPools[pool]} idx={idx} />
+		      <UnallocatedHostCollection key={pool}
+                                         name={pool}
+									     allHosts={hosts}
+                                         hosts={hostsByPools[pool]}
+										 startBlinkingCallback={startBlinkingCallback}
+										 stopBlinkingCallback={stopBlinkingCallback}
+								         idx={idx} />
             );
            })}
         </tbody>
@@ -906,12 +995,19 @@ var DashboardPanelGroup = React.createClass({
         <Panel heading="Allocations"
                setActivePanelCallback={this.setActivePanelCallback}
                activePanelName={this.state.activePanelName}>
-          <Allocations allocations={this.props.allocations} hosts={this.props.hosts} />
+          <Allocations allocations={this.props.allocations}
+                       hosts={this.props.hosts}
+                       startBlinkingCallback={this.props.startBlinkingCallback}
+                       stopBlinkingCallback={this.props.stopBlinkingCallback}
+                       hostsByIndices={this.props.hostsByIndices}
+           />
         </Panel>
         <Panel heading="Pools"
                setActivePanelCallback={this.setActivePanelCallback}
                activePanelName={this.state.activePanelName}>
           <Pools hosts={this.props.hosts} 
+                 startBlinkingCallback={this.props.startBlinkingCallback}
+                 stopBlinkingCallback={this.props.stopBlinkingCallback}
                  poolsNames={this.props.poolsNames} />
         </Panel>
         <Panel heading="Diagnostics"
@@ -971,7 +1067,8 @@ var Dashboard = React.createClass({
     if (this.state.loadState == "LOADING") {
       dashboardContent = <div className="col-md-6">Loading...</div>;
     } else if (this.state.loadState == "DONE") {
-      dashboardContent = <DashboardContent allocations={this.state.allocations} hosts={this.state.hosts} />;
+      dashboardContent = <DashboardContent allocations={this.state.allocations}
+                                           hosts={this.state.hosts} />;
     }
     return (
       <div>
