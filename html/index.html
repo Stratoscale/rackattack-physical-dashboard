@@ -1057,67 +1057,91 @@ var Diagnostics = React.createClass({
 
 var Panel = React.createClass({
   componentWillMount: function() {
-    this.panelContent = "";
-    this.isDoneRenderingByDefault = false;
-  },
-
-  shouldComponentUpdate: function(nextProps, nextState) {
-    return nextProps.activePanelName == nextProps.heading;
+    this.isDoneRenderingActiveByDefault = false;
   },
 
   render: function() {
     var panelID = this.props.heading + "_Panel";
-    var panelBodyClasses = "panel-body";
-    if (this.props.noPanelPadding) {
-        panelBodyClasses += " panel-body-with-list-group";
-    }
-    var panelCollapseClasses = "panel-collapse collapse";
-    if (this.props.activePanelName == this.props.heading) {
-        panelCollapseClasses += " in";
-    }
+    var panel = document.getElementById(panelID);
     return (
       <div className="panel panel-default">
-        <div className="panel-heading">
-            <h3 className="panel-title">
-                <a data-toggle="collapse" data-parent="#accordion" href={"#" + panelID}
-                   onClick={ () => this.setActivePanel(this.props.heading) }>
-                  {this.props.heading}
-                </a>
-            </h3>
-        </div>
-        <div id={panelID} className={panelCollapseClasses}>
-            <div className={panelBodyClasses}>
-              {this.props.children}
-            </div>
-        </div>
+        <PanelHeader panelID={panelID}
+                     isActive={this.props.isActiveByDefault}
+                     heading={this.props.heading}
+                     setActivePanelCallback={this.setActivePanel} />
+        <PanelBody panelID={panelID} isActive={this.props.isActiveByDefault} noPanelPadding={this.props.noPanelPadding}>
+          {this.props.children}
+        </PanelBody>
       </div>
     );
   },
 
   setActivePanel: function(panel) {
-    this.isDoneRenderingByDefault = true;
+    this.props.setActivePanelCallback();
+  }
+});
+
+var PanelBody = React.createClass({
+  render: function() {
+    var panelBodyClasses = "panel-body";
+    if (this.props.noPanelPadding) {
+        panelBodyClasses += " panel-body-with-list-group";
+    }
+    var panelCollapseClasses = "panel-collapse collapse";
+    if (this.props.isActive) {
+      panelCollapseClasses += " in";
+    }
+    return (
+      <div id={this.props.panelID} className={panelCollapseClasses}>
+        <div className={panelBodyClasses}>
+          {this.props.children}
+        </div>
+      </div>
+    );
+  },
+
+  shouldComponentUpdate: function(nextProps, nextState) {
+    return document.getElementById(this.props.panelID).classList.contains("in");
+  },
+});
+
+var PanelHeader = React.createClass({
+  render: function() {
+    var aClasses = "";
+    if (!this.props.isActive) {
+      aClasses = "collapsed";
+    }
+    return (
+      <a className={aClasses} data-toggle="collapse" data-parent="#accordion" href={"#" + this.props.panelID}
+         onClick={ () => this.setActivePanel(this.props.heading) }>
+        <div className="panel-heading btn-default">
+          <h3 className="panel-title">
+            {this.props.heading}
+          </h3>
+        </div>
+      </a>
+    );
+  },
+
+  setActivePanel: function(panel) {
     this.props.setActivePanelCallback(panel);
   }
 });
 
 var DashboardPanelGroup = React.createClass({
-  getInitialState: function() {
-    return {activePanelName: "Stats"};
-  },
-
   render: function() {
     return (
       <div className="panel-group" id="accordion">
         <Panel setActivePanelCallback={this.setActivePanelCallback}
-               activePanelName={this.state.activePanelName}
                heading="Stats"
                noPanelPadding={true}
+               isActiveByDefault={true}
                >
           <Stats hosts={this.props.hosts} />
         </Panel>
         <Panel heading="Allocations"
                setActivePanelCallback={this.setActivePanelCallback}
-               activePanelName={this.state.activePanelName}>
+               >
           <Allocations allocations={this.props.allocations}
                        hosts={this.props.hosts}
                        startBlinkingCallback={this.props.startBlinkingCallback}
@@ -1127,7 +1151,7 @@ var DashboardPanelGroup = React.createClass({
         </Panel>
         <Panel heading="Pools"
                setActivePanelCallback={this.setActivePanelCallback}
-               activePanelName={this.state.activePanelName}>
+               >
           <Pools hosts={this.props.hosts} 
                  startBlinkingCallback={this.props.startBlinkingCallback}
                  stopBlinkingCallback={this.props.stopBlinkingCallback}
@@ -1135,7 +1159,7 @@ var DashboardPanelGroup = React.createClass({
         </Panel>
         <Panel heading="Diagnostics"
                setActivePanelCallback={this.setActivePanelCallback}
-               activePanelName={this.state.activePanelName}>
+               >
           <Diagnostics hosts={this.props.hosts}
                        startBlinkingCallback={this.props.startBlinkingCallback}
                        stopBlinkingCallback={this.props.stopBlinkingCallback}
@@ -1143,7 +1167,7 @@ var DashboardPanelGroup = React.createClass({
         </Panel>
         <Panel heading="Legend"
                setActivePanelCallback={this.setActivePanelCallback}
-               activePanelName={this.state.activePanelName}>
+               >
             <StatesLegend />
         </Panel>
       </div>
@@ -1151,7 +1175,6 @@ var DashboardPanelGroup = React.createClass({
   },
 
   setActivePanelCallback: function(panel) {
-    this.state.activePanelName = panel;
     this.forceUpdate();
   }
 });

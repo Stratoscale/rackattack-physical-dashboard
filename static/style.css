@@ -133,22 +133,19 @@ label {
 nav {
     margin-top: 13px;
 }
-.panel-group .panel-heading a:after {
-    content: '-';
-    position: absolute;
-    right: 20px;
-    top:5px;
-    font-size: 20pt;
-}
-.panel-group .panel-heading a.collapsed:after {
+a.collapsed h3:after {
     content: '+';
+    float: right;
 }
-.panel-group .panel-heading a {
-    width: 100%;
-    display: block;
+.panel h3 {
+    text-decoration: none;
 }
-.panel-heading {
-    position: relative;
+.panel h3:after {
+    content: '-';
+    text-decoration: none;
+    float: right;
+    font-weight: bold;
+    font-weight: 15px;
 }
 .panel-body-with-list-group {
     padding: 0;
