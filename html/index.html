@@ -776,7 +776,8 @@ var HostListItem = React.createClass({
     var hostIconClasses = "host-icon " + stateMap[this.host.state]["labelClass"].replace('label', 'text');
     var innerHostIconClasses = "glyphicon " + stateMap[this.host.state]["iconClass"];
     return (
-        <li className="list-group-item">
+      <li className="list-group-item">
+        <div style={ {overflow: "auto"} }>
           <span className={hostIconClasses}>
             <span className={innerHostIconClasses}>
             </span>
@@ -786,10 +787,9 @@ var HostListItem = React.createClass({
           &nbsp;
           ({this.host.id})
           {copyButton}
-          <span className="badge">
-            <small>{this.host.ipAddress}</small>
-          </span>
-        </li>
+          <small className="badge pull-right">{this.host.ipAddress}</small>
+        </div>
+      </li>
     );
   },
 
