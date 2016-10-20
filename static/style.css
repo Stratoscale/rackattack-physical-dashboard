@@ -156,6 +156,9 @@ a.collapsed h3:after {
     border-left: 0;
     margin-bottom: 0;
 }
+.panel-body-with-list-group .list-group {
+    margin-bottom: 0;
+}
 .warningSignWrapper {
     position:absolute;
     right: 5px;
