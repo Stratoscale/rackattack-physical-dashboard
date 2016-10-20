@@ -889,7 +889,7 @@ var CollapsableCollectionRow = React.createClass({
 var CollectionList = React.createClass({
   render: function() {
     return (
-      <ul className="hosts-list list-group">
+      <ul className="list-group">
         {this.props.children}
       </ul>
     );
@@ -899,16 +899,18 @@ var CollectionList = React.createClass({
 var HostList = React.createClass({
   render: function() {
     return (
-      <CollectionList>
-        {this.props.hosts.map(function(host) {
-           return (
-	         <HostListItem
-	  	      key={host.id}
-              host={host}
-	  	      />
-           );
-         })}
-      </CollectionList>
+      <div className="hosts-list">
+        <CollectionList>
+          {this.props.hosts.map(function(host) {
+             return (
+	           <HostListItem
+                 key={host.id}
+                 host={host}
+               />
+             );
+           })}
+        </CollectionList>
+      </div>
     );
   }
 });

@@ -56,11 +56,11 @@ tr.hover td {
 
 .hosts-list {
     max-height: 0;
-    overflow: hidden;
+    overflow-y: auto;
     margin: 0;
 }
 tr.hover .hosts-list {
-    max-height: 500px;
+    max-height: 300px;
     transition: all 0.3s;
     margin-bottom: 5px;
 }
