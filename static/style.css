@@ -139,6 +139,10 @@ a.collapsed h3:after {
 }
 .panel h3 {
     text-decoration: none;
+    font-weight: bold;
+}
+a.collapsed h3 {
+    font-weight: normal;
 }
 .panel h3:after {
     content: '-';
