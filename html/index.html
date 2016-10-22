@@ -16,11 +16,6 @@
 var globalModelWebsocketPort = {{globalModelWebsocketPort}};
 var globalModelWebsocketSecret = "{{globalModelWebsocketSecret}}";
 
-function storeThemeInCookie() {
-    var theme = $('input[name="chooseStyle"]:checked').val();
-    Cookies.set("theme", theme)
-    document.body.className = theme;
-}
 </script>
 {% endblock %}
 {% endblock %}
@@ -45,6 +40,11 @@ function pad(str) {
     var pad = "00"
     var ans = pad.substring(0, pad.length - str.length) + str
     return ans;
+}
+
+function changeTheme(theme) {
+  Cookies.set("theme", theme)
+  document.body.className = theme;
 }
 
 function getAllocationIdxByHostID(hostID, hostsByIndices, allocations) {
@@ -1213,6 +1213,19 @@ var DashboardNav = React.createClass({
         </li>
     {% endfor %}
       </ul>
+      <div className="container-fluid">
+        <div className="collapse navbar-collapse">
+          <ul className="nav navbar-nav navbar-right">
+            <li className="dropdown">
+              <a href="#" className="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Color theme <span className="caret"></span></a>
+              <ul className="dropdown-menu">
+                <li><a href="#" onClick={() => changeTheme('light')}>Light</a></li>
+                <li><a href="#" onClick={() => changeTheme('dark')}>Dark</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
     </nav> );
   },
 });
@@ -1294,9 +1307,5 @@ if (theme === undefined) {
 }
 document.body.className = theme;
 </script>
-<div style="float:right;" >
-    <div><label><input type="radio" onclick="storeThemeInCookie();" name="chooseStyle" value="light" data-bind="checked: theme"> Light</label></div>
-    <div><label><input type="radio" onclick="storeThemeInCookie();" name="chooseStyle" value="dark" data-bind="checked: theme"> Dark</label></div>
-</div>
 <main class="container" id="content"></main>
 {% endblock %}
