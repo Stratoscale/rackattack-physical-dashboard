@@ -694,10 +694,6 @@ var AllocationExtendedData = React.createClass({
 });
 
 var Allocations = React.createClass({
-  componentDidUpdate: function() {
-    ReactDOM.findDOMNode(this.refs.filter).focus();
-  },
-
   filter: function() {
     var elem = ReactDOM.findDOMNode(this.refs.filter);
     this.allocationFilter = elem.value;
