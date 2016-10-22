@@ -12,3 +12,36 @@
     background-color: #232323;
     color: #cccccc;
 }
+.dark .label-success {
+    background-color: #41813d;
+}
+.dark .label-primary {
+    background-color: #6395be;
+}
+.dark .label-danger {
+    background-color: #df8a83;
+}
+.dark .label-default-dark {
+    background-color: white;
+}
+.dark .label-detached {
+    background-color: #b6cac5;
+}
+.dark .label-info {
+    background-color: #276e80;
+}
+.dark .label-default-light {
+    background-color: #555451;
+}
+.dark .label {
+    color: black;
+}
+.dark .list-group-item {
+    color: white;
+}
+.dark .table td {
+    border-color: #41403f;
+}
+.dark .machine {
+    border-color: #41403f;
+}
