@@ -43,11 +43,7 @@ function pad(str) {
 
 function changeTheme(theme) {
   Cookies.set("theme", theme);
-  var cssFile = {
-                  light: "static/lighttheme.css",
-                  dark:  "static/darktheme.css",
-                }[theme];
-
+  var cssFile = "static/themes/" + theme + ".css";
   var cssLinkIndex = 1;
   var oldLink = document.getElementsByTagName("link").item(cssLinkIndex);
   var newlink = document.createElement("link");
