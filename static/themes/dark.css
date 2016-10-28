@@ -1,7 +1,7 @@
 @import url(/realtimewebui/externals/bootstrap/css/bootstrap-theme.css);
-body {
-    color: #cccccc;
+body, .list-group-item {
     background-color: #232323;
+    color: #cccccc;
 }
 .popover-content, .popover-title, .hosts-list {
     color: black;
@@ -9,20 +9,16 @@ body {
 .panel {
     background-color: #232323;
 }
-.list-group-item {
-    background-color: #232323;
-    color: #cccccc;
-}
-.label-success {
+.label-success, .badge-success {
     background-color: #41813d;
 }
-.label-primary {
+.label-primary, .badge-primary {
     background-color: #6395be;
 }
-.label-danger {
+.label-danger, .badge-danger {
     background-color: #df8a83;
 }
-.label-detached {
+.label-detached, .badge-detached {
     background-color: #b6cac5;
 }
 .label-info {
@@ -34,30 +30,43 @@ body {
 .label {
     color: black;
 }
-.label-dark {
+.label-dark, .badge-dark  {
     background-color: #CFCFC4;
 }
-.badge-success {
-    background-color: #41813d;
-}
-.badge-primary {
-    background-color: #6395be;
-}
-.badge-danger {
-    background-color: #df8a83;
-}
-.badge-dark {
-    background-color: #CFCFC4;
-}
-.badge-detached {
-    background-color: #b6cac5;
-}
-.list-group-item {
-    color: white;
-}
-.table td {
+.machine, .table td {
     border-color: #41403f;
 }
-.machine {
+.navbar-default .navbar-nav > li > a:focus,
+.navbar-default .navbar-nav > li > a:active,
+.navbar-default .navbar-nav > li > a:hover {
+    text-shadow: none;
+	color: #707070;
+}
+.btn-default:hover, .btn-default:focus, .btn-default:active,
+.navbar-default .navbar-nav > .active > a,
+.navbar-default .navbar-nav > .active > a:focus,
+.navbar-default .navbar-nav > .active > a:hover,
+.navbar-default .navbar-nav > .active > a:active {
+	background-color: #626262;
+	background-image: none;
+    text-shadow: none;
+	color: #959595;
+}
+.panel-heading, .dropdown-menu, .navbar-default, .btn-default {
+	background-image: none;
+	background-color: #343434;
+	text-shadow: none;
+	color: #707070;
+}
+.dropdown-menu > li > a {
+	color: white;
+}
+.panel-default, .list-group-item, .navbar-default {
     border-color: #41403f;
+}
+.host-collection-row td {
+    border-top: 1px solid #41403f!important;
+}
+tr.hover td {
+    background-color: #707070!important;
 }
