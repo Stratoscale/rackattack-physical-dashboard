@@ -55,7 +55,7 @@
                             <li class="list-group-item"><span class="label label-primary"><span class="glyphicon glyphicon-pause"> </span> Available</span> (checked in) hosts in default pool: <span class="badge badge-primary" data-bind="text: nrHosts('default', 'CHECKED_IN')"></span></li>
                             <li class="list-group-item"><span class="label label-primary"><span class="glyphicon glyphicon-pause"> </span> Available</span> (checked in) in non-default pools: <span class="badge badge-primary" data-bind="text: nrHosts('', 'CHECKED_IN') - nrHosts('default', 'CHECKED_IN')"></span></li>
                             <li class="list-group-item"><span class="label label-danger"><span class="glyphicon glyphicon-remove"> </span> Destroyed</span> hosts: <span class="badge badge-danger" data-bind="text: nrHosts('', 'DESTROYED')"></span></li>
-                            <li class="list-group-item"><span class="label label-default-dark"><span class="glyphicon glyphicon-off"> </span> Offline</span> hosts: <span class="badge badge-dark" data-bind="text: nrHosts('', 'OFFLINE')"></span></li>
+                            <li class="list-group-item"><span class="label label-dark"><span class="glyphicon glyphicon-off"> </span> Offline</span> hosts: <span class="badge badge-dark" data-bind="text: nrHosts('', 'OFFLINE')"></span></li>
                             <li class="list-group-item"><span class="label label-success"><span class="glyphicon glyphicon-ok"> </span> In-use</span> (Inauguration Done) hosts: <span class="badge badge-success" data-bind="text: nrHosts('', 'INAUGURATION_DONE')"></span></li>
                             <li class="list-group-item"><span class="label label-detached"><span class="glyphicon glyphicon-eject"> </span> Detached</span> hosts: <span class="badge badge-detached" data-bind="text: nrHosts('', 'DETACHED')"></span></li>
                             <li class="list-group-item">Total Nr. of hosts: <span class="badge badge" data-bind="text: nrHosts('', '')"></span></li>
@@ -271,7 +271,7 @@
                             A temporary stage, on the road for the host to drop out of the cluster. This
                             happens if 5 slow reclamations failed on this host
                         </p>
-                        <p><span class="label label-default-dark"><span class="glyphicon glyphicon-off"></span> OFFLINE</span></p>
+                        <p><span class="label label-dark"><span class="glyphicon glyphicon-off"></span> OFFLINE</span></p>
                         <p>
                             The server is off.
                         </p>
@@ -361,7 +361,7 @@ var stateMap = {
     "INAUGURATION_LABEL_PROVIDED":{ iconClass: "glyphicon-play", labelClass: "label-info" },
     "INAUGURATION_DONE":{ iconClass: "glyphicon-ok", labelClass: "label-success" },
     "DESTROYED":{ iconClass: "glyphicon-remove", labelClass: "label-danger" },
-    "OFFLINE":{ iconClass: "glyphicon-off", labelClass: "label-default-dark" },
+    "OFFLINE":{ iconClass: "glyphicon-off", labelClass: "label-dark" },
     "DETACHED":{ iconClass: "glyphicon-eject", labelClass: "label-detached" }
 
 };
@@ -380,7 +380,7 @@ function updateHosts(statusObject)
             serverID: $(this).attr("id"),
             config: {
                 iconClass: "glyphicon-ban-circle",
-                labelClass: "label-default-light"
+                labelClass: "label-light"
             },
             color: "#b9b9b9",
             machineWarningDisplay: "none",

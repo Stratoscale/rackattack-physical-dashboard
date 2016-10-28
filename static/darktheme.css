@@ -1,47 +1,64 @@
-.dark {
+@import url(/realtimewebui/externals/bootstrap/css/bootstrap-theme.css);
+body {
     color: #cccccc;
     background-color: #232323;
 }
 .popover-content, .popover-title, .hosts-list {
     color: black;
 }
-.dark .panel {
+.panel {
     background-color: #232323;
 }
-.dark .list-group-item {
+.list-group-item {
     background-color: #232323;
     color: #cccccc;
 }
-.dark .label-success {
+.label-success {
     background-color: #41813d;
 }
-.dark .label-primary {
+.label-primary {
     background-color: #6395be;
 }
-.dark .label-danger {
+.label-danger {
     background-color: #df8a83;
 }
-.dark .label-default-dark {
-    background-color: white;
-}
-.dark .label-detached {
+.label-detached {
     background-color: #b6cac5;
 }
-.dark .label-info {
+.label-info {
     background-color: #276e80;
 }
-.dark .label-default-light {
+.label-light {
     background-color: #555451;
 }
-.dark .label {
+.label {
     color: black;
 }
-.dark .list-group-item {
+.label-dark {
+    color: white;
+    background-color: #CFCFC4;
+}
+.badge-success {
+    background-color: #41813d;
+}
+.badge-primary {
+    background-color: #6395be;
+}
+.badge-danger {
+    background-color: #df8a83;
+}
+.badge-dark {
+    background-color: #CFCFC4;
+}
+.badge-detached {
+    background-color: #b6cac5;
+}
+.list-group-item {
     color: white;
 }
-.dark .table td {
+.table td {
     border-color: #41403f;
 }
-.dark .machine {
+.machine {
     border-color: #41403f;
 }

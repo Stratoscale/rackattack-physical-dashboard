@@ -2,9 +2,8 @@
 
 {% block head %}
 {% block head_more %}
+<link href="/static/default-colors.css" rel="stylesheet">
 <link href="/static/style.css" rel="stylesheet">
-<link href="/static/darktheme.css" rel="stylesheet" id="dark">
-<link href="/static/lighttheme.css" rel="stylesheet" id="light">
 <script src="https://unpkg.com/react@15.3.2/dist/react.min.js"></script>
 <script src="https://unpkg.com/react-dom@15.3.2/dist/react-dom.min.js"></script>
 <script src="https://unpkg.com/babel-core@5.8.38/browser.min.js"></script>
@@ -43,8 +42,19 @@ function pad(str) {
 }
 
 function changeTheme(theme) {
-  Cookies.set("theme", theme)
-  document.body.className = theme;
+  Cookies.set("theme", theme);
+  var cssFile = {
+                  light: "static/lighttheme.css",
+                  dark:  "static/darktheme.css",
+                }[theme];
+
+  var cssLinkIndex = 1;
+  var oldLink = document.getElementsByTagName("link").item(cssLinkIndex);
+  var newlink = document.createElement("link");
+  newlink.setAttribute("rel", "stylesheet");
+  newlink.setAttribute("type", "text/css");
+  newlink.setAttribute("href", cssFile);
+  document.getElementsByTagName("head").item(0).replaceChild(newlink, oldLink);
 }
 
 function getAllocationIdxByHostID(hostID, hostsByIndices, allocations) {
@@ -284,7 +294,7 @@ var stateMap = {
     "INAUGURATION_LABEL_PROVIDED":{ iconClass: "glyphicon-play", labelClass: "label-info" },
     "INAUGURATION_DONE":{ iconClass: "glyphicon-ok", labelClass: "label-success" },
     "DESTROYED":{ iconClass: "glyphicon-remove", labelClass: "label-danger" },
-    "OFFLINE":{ iconClass: "glyphicon-off", labelClass: "label-default-dark" },
+    "OFFLINE":{ iconClass: "glyphicon-off", labelClass: "label-dark" },
     "DETACHED":{ iconClass: "glyphicon-eject", labelClass: "label-detached" }
 };
 
@@ -356,7 +366,7 @@ var Host = React.createClass({
     var iconClassNames = "glyphicon " + stateMap[this.props.data.state]["iconClass"];
     var warningSign = "";
     if (this.props.data.warnings) {
-      warningSign = (<span className="warningSignWrapper">
+      warningSign = (<span className="warning-sign-wrapper">
           <span className="glyphicon glyphicon-warning-sign">{this.props.data.warnings.length}</span>
       </span>)
     }
@@ -417,7 +427,7 @@ var Stats = React.createClass({
                 </span>
               </li>
               <li className="list-group-item">
-                <span className="label label-default-dark">
+                <span className="label label-dark">
                   <span className="glyphicon glyphicon-off">
                   </span>
                   &nbsp;
@@ -454,13 +464,13 @@ var Stats = React.createClass({
               </li>
               <li className="list-group-item">
                 Total Nr. of hosts:
-                <span className="badge badge">
+                <span className="badge">
                   {this.nrHosts('', '')}
                 </span>
               </li>
               <li className="list-group-item">
                 Current hosts usage:
-                <span className="badge badge">
+                <span className="badge">
                   {(((this.nrHosts('', 'INAUGURATION_DONE') + this.nrHosts('', 'DETACHED')) / this.nrHosts('', '')) * 100).toFixed(0).toString() + '%'}
                 </span>
               </li>
@@ -527,7 +537,7 @@ var StatesLegend = React.createClass({
           A temporary stage, on the road for the host to drop out of the cluster. This
           happens if 5 slow reclamations failed on this host
       </p>
-      <p><span className="label label-default-dark"><span className="glyphicon glyphicon-off"></span> OFFLINE</span></p>
+      <p><span className="label label-dark"><span className="glyphicon glyphicon-off"></span> OFFLINE</span></p>
       <p>
           The server is off.
       </p>
@@ -1183,7 +1193,7 @@ var EmptyHostSlot = React.createClass({
   render: function() {
     return (
       <td className="host machine">
-        <span className="label-default-light label machine-label">
+        <span className="label-light label machine-label">
           <span className="glyphicon glyphicon-ban-circle"></span>
           {pad(this.props.hostIdx)}
         </span>
@@ -1280,6 +1290,11 @@ var Dashboard = React.createClass({
 
   componentDidMount: function() {
     this.loadDefaultDashboard();
+	var theme = Cookies.get("theme");
+	if (theme === undefined) {
+		theme = "light";
+	}
+	changeTheme(theme);
   },
 
   loadDefaultDashboard: function() {
@@ -1297,11 +1312,6 @@ ReactDOM.render(
 );
 </script>
 <script>
-theme = Cookies.get("theme");
-if (theme === undefined) {
-    theme = "light";
-}
-document.body.className = theme;
 </script>
 <main class="container" id="content"></main>
 {% endblock %}

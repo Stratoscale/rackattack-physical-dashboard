@@ -1,7 +1,6 @@
 .machine {
     border-style: solid;
     border-width: 1px;
-    border-color: rgb(204, 204, 204);
     text-align: center;
     padding: 2px;
     margin: 0;
@@ -77,15 +76,6 @@ tr.hover .hosts-list {
 .host-collection-row .label {
     display: block;
 }
-.label-default-light {
-    background-color: #b9b9b9;
-}
-.label-default-dark {
-    background-color: black;
-}
-.label-detached {
-    background-color: #2f4f4f;
-}
 .copy-command {
     width: 15px;
     height: 20px;
@@ -108,22 +98,6 @@ tr.hover .hosts-list {
 label {
     font-weight: normal;
 }
-.badge-primary {
-    background-color: #428bca;
-}
-.badge-danger {
-    background-color: #a94442;
-}
-.badge-dark {
-    background-color: black;
-}
-.badge-success {
-    background-color: #5cb85c;
-}
-.badge-detached {
-    background-color: #2f4f4f;
-}
-
 .host-collection-row .host-icon {
     display: inline;
 }
@@ -163,7 +137,7 @@ a.collapsed h3 {
 .panel-body-with-list-group .list-group {
     margin-bottom: 0;
 }
-.warningSignWrapper {
+.warning-sign-wrapper {
     position:absolute;
     right: 5px;
     color: yellow;

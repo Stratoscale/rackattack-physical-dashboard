@@ -83,7 +83,7 @@ var stateMap = {
     "INAUGURATION_LABEL_PROVIDED":{ iconClass: "glyphicon-play", labelClass: "label-info" },
     "INAUGURATION_DONE":{ iconClass: "glyphicon-ok", labelClass: "label-success" },
     "DESTROYED":{ iconClass: "glyphicon-remove", labelClass: "label-danger" },
-    "OFFLINE":{ iconClass: "glyphicon-off", labelClass: "label-default-dark" },
+    "OFFLINE":{ iconClass: "glyphicon-off", labelClass: "label-dark" },
     "DETACHED":{ iconClass: "glyphicon-eject", labelClass: "label-detached" }
 
 };
@@ -101,7 +101,7 @@ function updateHosts(statusObject)
             serverID: $(this).attr("id"),
             config: {
                 iconClass: "glyphicon-ban-circle",
-                labelClass: "label-default-light"
+                labelClass: "label-light"
             },
             color: "#b9b9b9"
         }))

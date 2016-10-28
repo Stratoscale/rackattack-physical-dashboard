@@ -1,7 +1,20 @@
-.light {
+@import url(/realtimewebui/externals/bootstrap/css/bootstrap-theme.css);
+body {
     color: black;
     background-color: white;
 }
-.light .panel {
+.panel {
     background-color: white;
+}
+.machine {
+    border-color: rgb(204, 204, 204);
+}
+.badge-primary {
+    background-color: #428bca;
+}
+.badge-success {
+    background-color: #5cb85c;
+}
+.badge-danger {
+    background-color: #a94442;
 }

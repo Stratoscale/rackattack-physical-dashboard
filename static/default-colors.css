@@ -1,0 +1,15 @@
+.label-light {
+    background-color: #b9b9b9;
+}
+.label-dark {
+    background-color: black;
+}
+.label-detached {
+    background-color: #2f4f4f;
+}
+.badge-detached {
+    background-color: #2f4f4f;
+}
+.badge-dark {
+    background-color: black;
+}
