@@ -295,6 +295,10 @@ var stateMap = {
 };
 
 var Host = React.createClass({
+  componentWillMount: function() {
+    this.previousPopoverContent = null;
+  },
+
   getNatPortFromInnerIPAddress: function(ipAddress) {
         return 2000 + parseInt(ipAddress.split(".")[3]) + (parseInt(ipAddress.split(".")[2]) - 1) * 256;
   },
@@ -320,21 +324,32 @@ var Host = React.createClass({
     return content;
   },
 
-  componentDidMount: function() {
+  popoverIfNeeded: function() {
     var content = this.generatePopoverContent();
-    $("#node-" + this.props.data.id).popover({
-      title: this.props.data.id,
-      container: "body",
-      content: content,
-      trigger: "hover",
-      placement: "auto",
-      html: true
-    });
+    if (content != this.previousPopoverContent) {
+      if (this.previousPopoverContent !== null) {
+       $("#node-" + this.props.data.id).attr('data-content', content);
+      } else {
+       $("#node-" + this.props.data.id).popover({
+         title: this.props.data.id,
+         container: "body",
+         content: content,
+         trigger: "hover",
+         placement: "auto",
+         html: true
+       });
+      }
+    }
+    this.previousPopoverContent = content;
   },
 
   getAllocationIdx: function() {
     var hostID = this.props.data.id;
     return getAllocationIdxByHostID(hostID, this.props.hostsByIndices, this.props.allocations);
+  },
+
+  componentWillUpdate: function() {
+    this.popoverIfNeeded()
   },
 
   render: function() {
