@@ -10,7 +10,7 @@ test-server:
 	PYTHONPATH=py UPSETO_JOIN_PYTHON_NAMESPACES=yes python py/rackattack/dashboard/main.py --realtimewebuiRoot $(PWD)/../realtimewebui --dashboardRoot $(PWD) --rackattackInstances Bezeq:rackattack-provider.dc1.strato,RainbowLab:10.16.104.1
 
 test-server-local:
-	RACKATTACK_PROVIDER=tcp://127.0.0.1:1014@@amqp://guest:guest@127.0.0.1:1013/%2F@@http://127.0.0.1:1016 PYTHONPATH=py UPSETO_JOIN_PYTHON_NAMESPACES=yes python py/rackattack/dashboard/main.py --realtimewebuiRoot $(PWD)/../realtimewebui --dashboardRoot $(PWD)
+	RACKATTACK_PROVIDER=tcp://127.0.0.1:1014@@amqp://guest:guest@127.0.0.1:1013/%2F@@http://127.0.0.1:1016 PYTHONPATH=py UPSETO_JOIN_PYTHON_NAMESPACES=yes python py/rackattack/dashboard/main.py --realtimewebuiRoot $(PWD)/../realtimewebui --dashboardRoot $(PWD) --localhostRackattackProvider
 
 test-cli:
 	RACKATTACK_PROVIDER=tcp://rackattack-provider:1014@tcp://rackattack-provider:1015 PYTHONPATH=py UPSETO_JOIN_PYTHON_NAMESPACES=yes python py/rackattack/dashboard/cli.py
