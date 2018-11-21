@@ -66,73 +66,81 @@ function getAllocationIdxByHostID(hostID, hostsByIndices, allocations) {
 }
 
 var DashboardContent = React.createClass({
-  getInitialState: function() {
-    return {viewMode: "state"};
-  },
+    getInitialState: function () {
+      return {viewMode: "state"}
+    },
 
-  getPoolsNames: function() {
-    var poolsNames = _.uniq(_.map(this.props.hosts, "pool"));
-    poolsNames.sort();
-    return poolsNames;
-  },
+    getPoolsNames: function () {
+      var poolsNames = _.uniq(_.map(this.props.hosts, "pool"))
+      poolsNames.sort()
+      return poolsNames
+    },
 
-  getHostsByIndices: function() {
-    var result = {};
-    _.each(this.props.hosts, function(host){
-      result[host.index] = host;
-    });
-    return result;
-  },
+    getHostsByIndices: function () {
+      var result = {}
+      _.each(this.props.hosts, function (host) {
+        result[host.index] = host
+      })
+      return result
+    },
 
-  render: function() {
-    var poolsNames = this.getPoolsNames()
-    var blinkingHostsIDs;
-    if (this.blinkingHostsIDs === undefined) {
-        blinkingHostsIDs = [];
-    } else {
-        blinkingHostsIDs = this.blinkingHostsIDs;
-    }
-    this.hostsByIndices = this.getHostsByIndices();
-    return (
-      <div className="row">
-        <section className="col-md-6">
-          <ViewModeSelection setViewModeCallback={this.setViewMode} />
-          <RackList hosts={this.props.hosts}
-                    viewMode={this.state.viewMode}
-                    poolsNames={poolsNames}
-                    allocations={this.props.allocations}
-                    hostsByIndices={this.hostsByIndices}
-                    blinkingHostsIDs={blinkingHostsIDs} />
-        </section>
-        <aside className="col-md-6">
+    getHostsByIds: function () {
+      return _.keyBy(this.props.hosts, 'id')
+    },
+
+    render: function () {
+      var poolsNames = this.getPoolsNames()
+      var blinkingHostsIDs
+      if (this.blinkingHostsIDs === undefined) {
+        blinkingHostsIDs = []
+      } else {
+        blinkingHostsIDs = this.blinkingHostsIDs
+      }
+      this.hostsByIndices = this.getHostsByIndices()
+      this.hostsByIds     = this.getHostsByIds()
+      return (
+        <div className="row">
+          <section className="col-md-6">
+            <ViewModeSelection setViewModeCallback={this.setViewMode}/>
+            <RackList hosts={this.props.hosts}
+                      viewMode={this.state.viewMode}
+                      poolsNames={poolsNames}
+                      allocations={this.props.allocations}
+                      hostsByIndices={this.hostsByIndices}
+                      blinkingHostsIDs={blinkingHostsIDs}/>
+          </section>
+          <aside className="col-md-6">
             <DashboardPanelGroup
-             allocations={this.props.allocations}
-             hosts={this.props.hosts}
-             poolsNames={poolsNames}
-             startBlinkingCallback={this.startBlinking}
-             stopBlinkingCallback={this.stopBlinking}
-             hostsByIndices={this.hostsByIndices}
+              allocations={this.props.allocations}
+              hosts={this.props.hosts}
+              tags={this.props.tags}
+              poolsNames={poolsNames}
+              startBlinkingCallback={this.startBlinking}
+              stopBlinkingCallback={this.stopBlinking}
+              hostsByIndices={this.hostsByIndices}
+              hostsByIds={this.hostsByIds}
             />
-        </aside>
-      </div>
-    );
-  },
-  
-  setViewMode: function(viewMode) {
-    this.state.viewMode = viewMode;
-    this.forceUpdate();
-  },
+          </aside>
+        </div>
+      )
+    },
 
-  startBlinking: function(hostsIDs) {
-    this.blinkingHostsIDs = hostsIDs;
-    this.forceUpdate();
-  },
+    setViewMode: function (viewMode) {
+      this.state.viewMode = viewMode
+      this.forceUpdate()
+    },
 
-  stopBlinking: function() {
-    this.blinkingHostsIDs = [];
-    this.forceUpdate();
-  },
-});
+    startBlinking: function (hostsIDs) {
+      this.blinkingHostsIDs = hostsIDs
+      this.forceUpdate()
+    },
+
+    stopBlinking: function () {
+      this.blinkingHostsIDs = []
+      this.forceUpdate()
+    },
+})
+
 
 var ViewModeOption = React.createClass({
   render: function() {
@@ -1145,6 +1153,58 @@ var PanelHeader = React.createClass({
   }
 });
 
+var Tags = React.createClass({
+    filter: function () {
+      this.tagFilter = this.filterTag.value
+      this.forceUpdate()
+    },
+
+    render: function () {
+      var self                  = this
+      var startBlinkingCallback = this.props.startBlinkingCallback
+      var stopBlinkingCallback  = this.props.stopBlinkingCallback
+      var hostsByIds            = this.props.hostsByIds
+      var tagFilter             = ""
+      var tags                  = this.props.tags
+      if (this.tagFilter !== undefined && this.tagFilter) {
+        tags = _.pickBy(tags, (hosts, tag) => tag.includes(self.tagFilter))
+      }
+      return (
+        <table className="table">
+          <thead>
+          <tr>
+            <th>Tag</th>
+          </tr>
+          <tr>
+            <td colSpan="1">
+              <div className="col-md-2">
+                Filter: &nbsp;
+              </div>
+              <div className="col-md-10">
+                <input onChange={this.filter} ref={filter => this.filterTag = filter} type="text" className="form-control"/>
+              </div>
+            </td>
+          </tr>
+          </thead>
+          <tbody>
+          {Object.entries(tags).map(([tag, hosts], idx) => {
+            const hostsByTags = hosts.map(hostId => hostsByIds[hostId])
+            return <CollapsableHostCollectionRow
+              key={tag}
+              name={tag}q
+              hosts={hostsByTags}
+              startBlinkingCallback={self.props.startBlinkingCallback}
+              stopBlinkingCallback={self.props.stopBlinkingCallback}
+              idx={idx}
+            />
+          })}
+          </tbody>
+        </table>
+      )
+    }
+})
+
+
 var DashboardPanelGroup = React.createClass({
   render: function() {
     return (
@@ -1173,6 +1233,16 @@ var DashboardPanelGroup = React.createClass({
                  startBlinkingCallback={this.props.startBlinkingCallback}
                  stopBlinkingCallback={this.props.stopBlinkingCallback}
                  poolsNames={this.props.poolsNames} />
+        </Panel>
+        <Panel heading="Tags"
+               setActivePanelCallback={this.setActivePanelCallback}
+               >
+            <Tags tags={this.props.tags}
+              hosts={this.props.hosts}
+              startBlinkingCallback={this.props.startBlinkingCallback}
+              stopBlinkingCallback={this.props.stopBlinkingCallback}
+              hostsByIds={this.props.hostsByIds}
+            />
         </Panel>
         <Panel heading="Diagnostics"
                setActivePanelCallback={this.setActivePanelCallback}
@@ -1262,7 +1332,7 @@ var Dashboard = React.createClass({
       dashboardContent = <div className="col-md-6">Loading...</div>;
     } else if (this.state.loadState == "DONE") {
       dashboardContent = <DashboardContent allocations={this.state.allocations}
-                                           hosts={this.state.hosts} />;
+                                           hosts={this.state.hosts} tags={this.state.tags} />;
     }
     return (
       <div>
@@ -1281,7 +1351,7 @@ var Dashboard = React.createClass({
       this.forceUpdate();
       return;
     }
-    this.setState({loadState: "DONE", hosts: state["hosts"], allocations: state["allocations"]});
+    this.setState({loadState: "DONE", hosts: state["hosts"], allocations: state["allocations"], tags: state.tags});
   },
 
   changeStateToLoading: function(loadState, hosts) {

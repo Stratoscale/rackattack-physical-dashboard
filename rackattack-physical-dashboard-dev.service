@@ -1,0 +1,11 @@
+[Unit]
+Description=Rackattack Dashboard
+After=network.target
+
+[Service]
+Type=simple
+Environment='PYTHONPATH=/usr/share/rackattack-physical-dashboard/rackattack-physical-dashboard.egg'
+ExecStart=/bin/sh -c "exec /usr/bin/python -m rackattack.dashboard.main --realtimewebuiRoot=/usr/share/rackattack-physical-dashboard/realtimewebui --dashboardRoot=/usr/share/rackattack-physical-dashboard --localhostRackattackProvider --localhostRackattackProviderName Hertzliya --localhostRackattackProviderOutsideURL rackattack-provider-dev"
+
+[Install]
+WantedBy=multi-user.target

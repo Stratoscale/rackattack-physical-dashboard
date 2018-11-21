@@ -1,3 +1,10 @@
+check_defined = \
+    $(strip $(foreach 1,$1, \
+        $(call __check_defined,$1,$(strip $(value 2)))))
+__check_defined = \
+    $(if $(value $1),, \
+      $(error Undefined $1$(if $2, ($2))))
+
 all: build check_convention
 
 clean:
@@ -26,13 +33,14 @@ build/%.egg:
 	UPSETO_JOIN_PYTHON_NAMESPACES=yes PYTHONPATH=py:../realtimewebui/py python -m upseto.packegg --entryPoint=$< --output=$@ --createDeps=$@.dep --compile_pyc --joinPythonNamespaces
 
 install: build
+	$(call check_defined, ENV)
 	-sudo systemctl stop rackattack-physical-dashboard.service
 	-sudo mkdir -p /usr/share/rackattack-physical-dashboard/realtimewebui
 	sudo cp build/*.egg /usr/share/rackattack-physical-dashboard
 	sudo cp -r html /usr/share/rackattack-physical-dashboard/
 	sudo cp -r static /usr/share/rackattack-physical-dashboard/
 	sudo cp -r ../realtimewebui/js ../realtimewebui/html ../realtimewebui/externals /usr/share/rackattack-physical-dashboard/realtimewebui
-	sudo cp rackattack-physical-dashboard.service /usr/lib/systemd/system/rackattack-physical-dashboard.service
+	sudo cp rackattack-physical-dashboard-$(ENV).service /usr/lib/systemd/system/rackattack-physical-dashboard.service
 	sudo systemctl enable rackattack-physical-dashboard.service
 	if ["$(DONT_START_SERVICE)" == ""]; then sudo systemctl start rackattack-physical-dashboard; fi
 
