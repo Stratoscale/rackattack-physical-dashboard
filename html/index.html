@@ -117,7 +117,7 @@ var DashboardContent = React.createClass({
       </div>
     );
   },
-  
+
   setViewMode: function(viewMode) {
     this.state.viewMode = viewMode;
     this.forceUpdate();
@@ -173,7 +173,7 @@ var ViewModeSelection = React.createClass({
       </div>
     );
   },
-  
+
   setViewMode: function(viewMode) {
     this.state.activeViewMode = viewMode;
     this.forceUpdate();
@@ -243,7 +243,7 @@ var Rack = React.createClass({
             if (hostID in hosts) {
                 return <Host data={hosts[hostID]}
                         key={hostID}
-                        hostIdx={hostIdx} 
+                        hostIdx={hostIdx}
                         viewMode={self.props.viewMode}
                         poolsNames={self.props.poolsNames}
                         allocations={self.props.allocations}
@@ -317,6 +317,10 @@ var Host = React.createClass({
             content += "<li>" + warning + "</li>";
         }
         content += "</ul></span>";
+    }
+
+    if (this.props.data.tags) {
+        content += "<br />Tags: " + this.props.data.tags.join(', ');
     }
     if (this.props.data.reasonForDestruction) {
         content += "<div class='text-danger'>Reason for destruction: " + this.props.data.reasonForDestruction + "</span>";
@@ -1169,7 +1173,7 @@ var DashboardPanelGroup = React.createClass({
         <Panel heading="Pools"
                setActivePanelCallback={this.setActivePanelCallback}
                >
-          <Pools hosts={this.props.hosts} 
+          <Pools hosts={this.props.hosts}
                  startBlinkingCallback={this.props.startBlinkingCallback}
                  stopBlinkingCallback={this.props.stopBlinkingCallback}
                  poolsNames={this.props.poolsNames} />
